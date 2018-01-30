@@ -1,7 +1,7 @@
 # StalkPhish
 *StalkPhish - The Phishing kits stalker*
 
-**StalkPhish** is a tool created for searching into free OSINT databases for specific phishing kits URL. More, **StalkPhish** is designed to try finding phishing kits sources. Some scammers can't or don't remove their phishing kit sources when they deploy it. You can try to find these sources to extract some useful informations as: e-mail addresses where is send stolen data, some more informations about scammer or phishing kit developer. From there you can extend your knowledge about the threat and organizations, and get much useful information for your investigations.
+**StalkPhish** is a tool created for searching into free OSINT databases for specific phishing kits URL. More, **StalkPhish** is designed to try finding phishing kits sources. Some scammers can't or don't remove their phishing kit sources when they deploy it. You can try to find these sources to extract some useful information as: e-mail addresses where is send stolen data, some more information about scammer or phishing kit developer. From there you can extend your knowledge about the threat and organizations, and get much useful information for your investigations.
 
 ## Features
 - find URL where a phishing kit is deployed (from OSINT databases)
@@ -143,9 +143,9 @@ Some configurable parameters are:
 - log_file: The logging file (the path and file will be created if don't exist)
 - Kits_download_Dir: Directory to store downloaded phishing kits archives
 - sqliteDB_tablename: Main database table
-- sqliteDB_Investig_tablename: Investigation table with usefull informations for investigations
+- sqliteDB_Investig_tablename: Investigation table with useful information for investigations
 - http_proxy: HTTP/Socks5 proxy to use for downloads
-- UAfile: HTTP user-agents file to use for phishing kits HTTP Get informations
+- UAfile: HTTP user-agents file to use for phishing kits HTTP Get information
 
 ## Docker
 Build an start the container with docker-composer:
