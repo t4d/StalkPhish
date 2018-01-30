@@ -1,7 +1,7 @@
 # StalkPhish
 *StalkPhish - The Phishing kits stalker*
 
-**StalkPhish** is a tool created for searching into free OSINT databases for specific phishing kits URL. More, **StalkPhish** is designed to try finding phishing kits sources. Some scammers can't or don't remove their phishing kit sources when they deploy it. You can try to find these sources to extract some usefull informations as: e-mail addresses where is send stolen data, some more informations about scammer or phishing kit developper. From there you can extend your knowledge about the threat and organizations, and get many usefull informations for your investigations.
+**StalkPhish** is a tool created for searching into free OSINT databases for specific phishing kits URL. More, **StalkPhish** is designed to try finding phishing kits sources. Some scammers can't or don't remove their phishing kit sources when they deploy it. You can try to find these sources to extract some useful informations as: e-mail addresses where is send stolen data, some more informations about scammer or phishing kit developer. From there you can extend your knowledge about the threat and organizations, and get much useful information for your investigations.
 
 ## Features
 - find URL where a phishing kit is deployed (from OSINT databases)
@@ -146,3 +146,19 @@ Some configurable parameters are:
 - sqliteDB_Investig_tablename: Investigation table with usefull informations for investigations
 - http_proxy: HTTP/Socks5 proxy to use for downloads
 - UAfile: HTTP user-agents file to use for phishing kits HTTP Get informations
+
+## Docker
+Build an start the container with docker-composer:
+~~~
+$ cd docker/
+$ docker-compose up --build -d
+~~~
+
+The container is configured to keep interesting files into the host's /tmp directory.
+
+You can now execute shell and start launch StalkPhish:
+~~~
+$ docker exec -ti stalkphish bash
+root@stalkphish:/# cd /opt/StalkPhish/stalkphish/
+root@stalkphish:/opt/StalkPhish/stalkphish# ./StalkPhish.py -c conf/example.conf 
+~~~

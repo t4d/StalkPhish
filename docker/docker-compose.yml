@@ -1,0 +1,14 @@
+version: "2"
+
+services:
+ stalkphish:
+  image: stalkphish
+  container_name: stalkphish
+  hostname: stalkphish
+  build: .
+  volumes:
+   - /tmp/log:/opt/StalkPhish/stalkphish/log:rw
+   - /tmp/dl:/opt/StalkPhish/stalkphish/dl:rw
+   - /tmp/db:/opt/StalkPhish/stalkphish/db:rw
+
+  network_mode: bridge
