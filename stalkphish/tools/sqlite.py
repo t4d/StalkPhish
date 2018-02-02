@@ -30,12 +30,13 @@ class SqliteCmd(object):
 		except:
 			err = sys.exc_info()
 			print("[!!!] SQLiteInsertStillInvestig Error: " + str(err))
+			#print("[!!!] SQLiteInsertInvestigPK Error: " + str(err))
 
 
 	def SQLiteInsertStillTryDownload(self, TABLEname, siteURL):
 		'''Insert StillTryDownload changes'''
 		try:
-			self.cur.execute('UPDATE ' +TABLEname+ ' SET StillTryDownload =\'Y\' WHERE siteURL=?;', (siteURL,))
+			self.cur.execute('UPDATE ' +TABLEname+ ' SET StillTryDownload =\'Y\' WHERE siteURL LIKE '+"\""+siteURL+"%\""+';')
 			self.conn.commit()
 		except:
 			err = sys.exc_info()
@@ -43,7 +44,8 @@ class SqliteCmd(object):
 
 	def SQLiteVerifyEntry(self, TABLEname, siteURL):
 		'''Verify if entry still exist'''
-		res = self.cur.execute('SELECT EXISTS (SELECT 1 FROM '+TABLEname+' WHERE siteURL='+"\""+siteURL+"\""+' LIMIT 1);')
+		#res = self.cur.execute('SELECT EXISTS (SELECT 1 FROM '+TABLEname+' WHERE siteURL='+"\""+siteURL+"\""+' LIMIT 1);')
+		res = self.cur.execute('SELECT EXISTS (SELECT 1 FROM '+TABLEname+' WHERE siteURL LIKE '+"\""+siteURL+"%\""+' LIMIT 1);')
 		fres = res.fetchone()[0]
 		# 0ô
 		if fres is not 0:

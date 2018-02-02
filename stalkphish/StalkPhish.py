@@ -37,7 +37,7 @@ from tools.sqlite import SqliteCmd
 from tools.logging import Logger
 from tools.confparser import ConfParser
 
-VERSION = "0.9"
+VERSION = "0.9.1"
 
 # Graceful banner  :)
 def banner():

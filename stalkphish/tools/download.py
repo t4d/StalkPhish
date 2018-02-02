@@ -14,6 +14,7 @@ import socket
 import zipfile
 import warnings
 import sqlite3
+from os.path import dirname
 from urllib.parse import urlparse
 from tools.utils import TimestampNow
 from tools.utils import VerifyPath
@@ -30,14 +31,24 @@ def TryPKDownload(siteURL,siteDomain,IPaddress,TABLEname,InvTABLEname,DLDir,SQL,
 	now = str(TimestampNow().Timestamp())
 	SHA = SHA256()
 
+	# Cleaning siteURL before trying to download
+	PsiteURL = None
+	ResiteURL = dirname(siteURL)
+	PsiteURL = urlparse(ResiteURL)
+	if len(PsiteURL.path.split("/")[1:]) >= 2:
+		siteURL = ResiteURL.rsplit('/', 1)[0]
+	else:
+		siteURL = ResiteURL
+
+	# Let's try to find a phishing kit source archive
 	try:
 		r = requests.get(siteURL, headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5,12))
 		LOG.info("["+str(r.status_code)+"] "+r.url)
 
-		if str(r.status_code) == "200":
+		if (str(r.status_code) == "200") or (str(r.status_code) == "403"):
 			SQL.SQLiteInsertStillTryDownload(TABLEname, siteURL)
 			if SQL.SQLiteInvestigVerifyEntry(InvTABLEname, siteDomain, IPaddress) is 0:
-				SQL.SQLiteInvestigInsert(InvTABLEname, siteURL, siteDomain, IPaddress, now, '200')
+				SQL.SQLiteInvestigInsert(InvTABLEname, siteURL, siteDomain, IPaddress, now, str(r.status_code))
 
 			else:
 				pass
@@ -75,6 +86,7 @@ def TryPKDownload(siteURL,siteDomain,IPaddress,TABLEname,InvTABLEname,DLDir,SQL,
 											# Still collected file
 											if os.path.exists(savefile):
 												LOG.info("[DL ] Found still collected archive: "+savefile)
+												return
 											# New file to download
 											else:
 												LOG.info("[DL ] Found archive, downloaded it as: "+savefile)
@@ -84,6 +96,7 @@ def TryPKDownload(siteURL,siteDomain,IPaddress,TABLEname,InvTABLEname,DLDir,SQL,
 												ZipFileName = str(zzip+'.zip')
 												ZipFileHash = SHA.hashFile(savefile)
 												SQL.SQLiteInvestigUpdatePK(InvTABLEname,siteURL,ZipFileName,ZipFileHash,now,lastHTTPcode)
+												return
 										else:
 											pass
 									# 404
