@@ -1,4 +1,4 @@
-FROM phusion/baseimage:0.9.22
+FROM phusion/baseimage:0.10.0
 
 LABEL maintainer "o0tad0o@gmail.com"
 
