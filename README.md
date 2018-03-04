@@ -163,5 +163,5 @@ root@stalkphish:/# cd /opt/StalkPhish/stalkphish/
 root@stalkphish:/opt/StalkPhish/stalkphish# ./StalkPhish.py -c conf/example.conf 
 ~~~
 
-## Demo video 
-![isyoutube](https://www.youtube.com/watch?v=2YWLZSgrdp0)
+## Demo video
+[![StalkPhish v0.9 running video](https://img.youtube.com/vi/2YWLZSgrdp0/0.jpg)](https://www.youtube.com/watch?v=VID)
