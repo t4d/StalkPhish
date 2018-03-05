@@ -36,8 +36,7 @@ from tools.utils import UAgent
 from tools.sqlite import SqliteCmd
 from tools.logging import Logger
 from tools.confparser import ConfParser
-
-VERSION = "0.9.1"
+VERSION = "0.9.2"
 
 # Graceful banner  :)
 def banner():
@@ -364,6 +363,7 @@ def main():
 
 		# Phishing Kit download launch if activated
 		if DLPhishingKit is "YES":
+			LOG.info("Starting trying to download phishing kits sources...")
 			TryDLPK(TABLEname,InvTABLEname,DLDir,SQL,PROXY,LOG,UAFILE)
 		else:
 			pass

@@ -22,6 +22,13 @@
 * requests
 * PySocks
 
+## Upgrade StalkPhish v0.9 to v0.9.2
+To update StalPhish v0.9 database, please change your DB schema, to add a new column, like this:
+~~~
+$ sqlite3 db/StalkPhish.sqlite3
+sqlite> ALTER TABLE Investigation_Table_Name ADD COLUMN PageTitle TEXT;
+~~~
+
 ## Install
 Install the requirements
 ~~~
