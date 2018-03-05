@@ -11,6 +11,7 @@ import json
 import socket
 import warnings
 import sqlite3
+from os.path import dirname
 from urllib.parse import urlparse
 from tools.utils import TimestampNow
 from tools.utils import UAgent
@@ -37,9 +38,10 @@ def UrlscanExtractor(LOG,SQL,TABLEname,PROXY,UAFILE):
 		for item in HTMLText['results']:
 			# remove URL containing UID-style strings
 			siteURL = re.split("(?:[0-9a-fA-F]:?){32}", item['page']['url'])[0]
+			dn = dirname(siteURL)
 
 			## Test if entry still exist in DB
-			if SQL.SQLiteVerifyEntry(TABLEname, siteURL) is 0:
+			if SQL.SQLiteVerifyEntry(TABLEname, dn) is 0:
 				source_url = item['result'].replace("/api/v1","")
 				siteDomain = urlparse(item['page']['url']).netloc
 				

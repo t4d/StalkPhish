@@ -12,6 +12,7 @@ import socket
 import sqlite3
 import logging
 import requests
+from os.path import dirname
 from urllib.parse import urlparse
 from tools.utils import TimestampNow
 from tools.utils import UAgent
@@ -36,9 +37,10 @@ def PhishtankExtractor(phishtank_file,SearchString,LOG,SQL,TABLEname,PROXY,UAFIL
 		if SearchString in entry['url']:
 			# remove URL containing UID-style strings
 			siteURL=re.split("(?:[0-9a-fA-F]:?){32}", entry['url'])[0]
+			dn = dirname(siteURL)
 
 			## Test if entry still exist in DB
-			if SQL.SQLiteVerifyEntry(TABLEname, siteURL) is 0:
+			if SQL.SQLiteVerifyEntry(TABLEname, dn) is 0:
 
 				IPaddress=entry['details'][0]['ip_address']
 				source_url=entry['phish_detail_url']

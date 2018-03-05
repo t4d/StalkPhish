@@ -11,6 +11,7 @@ import json
 import socket
 import warnings
 import sqlite3
+from os.path import dirname
 from urllib.parse import urlparse
 from tools.utils import TimestampNow
 from tools.utils import UAgent
@@ -44,9 +45,10 @@ def UrlqueryExtractor(LOG,SQL,TABLEname,PROXY,UAFILE):
 			else:
 				siteDomain=siteURL.split('/')[0]
 				siteURL="http://"+siteURL
+			dn = dirname(siteURL)
 
 			## Test if entry still exist in DB
-			if SQL.SQLiteVerifyEntry(TABLEname, siteURL) is 0:
+			if SQL.SQLiteVerifyEntry(TABLEname, dn) is 0:
 
 				## Proceed to informations retrieve
 				source_url = "https://urlquery.net/"+line[1]

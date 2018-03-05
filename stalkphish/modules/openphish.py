@@ -11,6 +11,7 @@ import socket
 import sqlite3
 import logging
 import requests
+from os.path import dirname
 from urllib.parse import urlparse
 from tools.utils import TimestampNow
 from tools.utils import UAgent
@@ -34,11 +35,12 @@ def OpenphishExtractor(openphish_file,SearchString,LOG,SQL,TABLEname,PROXY,UAFIL
 			## Search
 			if SearchString in entry:
 				# remove URL containing UID-style strings
-				#siteURL = entry.rstrip()
 				siteURL = re.split("(?:[0-9a-fA-F]:?){32}", entry.rstrip())[0]
+				dn = dirname(siteURL)
 
 				## Test if entry still exist in DB
-				if SQL.SQLiteVerifyEntry(TABLEname, siteURL) is 0:
+				#if SQL.SQLiteVerifyEntry(TABLEname, siteURL) is 0:
+				if SQL.SQLiteVerifyEntry(TABLEname, dn) is 0:
 					now=str(TimestampNow().Timestamp())
 					siteDomain=urlparse(entry).netloc
 					source_url=openphish_file
