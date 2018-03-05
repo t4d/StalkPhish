@@ -36,15 +36,24 @@ class SqliteCmd(object):
 	def SQLiteInsertStillTryDownload(self, TABLEname, siteURL):
 		'''Insert StillTryDownload changes'''
 		try:
-			self.cur.execute('UPDATE ' +TABLEname+ ' SET StillTryDownload =\'Y\' WHERE siteURL LIKE '+"\""+siteURL+"%\""+';')
+			self.cur.execute('UPDATE ' +TABLEname+ ' SET StillTryDownload =\'Y\' WHERE siteURL LIKE \''+siteURL+'%\';')
 			self.conn.commit()
 		except:
 			err = sys.exc_info()
 			print("[!!!] SQLiteInsertStillTryDownload Error: " + str(err))
 
+	# def SQLiteVerifyEntry(self, TABLEname, siteURL):
+	# 	'''Verify if entry still exist'''
+	# 	res = self.cur.execute('SELECT EXISTS (SELECT 1 FROM '+TABLEname+' WHERE siteURL='+"\""+siteURL+"\""+' LIMIT 1);')
+	# 	fres = res.fetchone()[0]
+	# 	# 0ô
+	# 	if fres is not 0:
+	# 		return 1
+	# 	else:
+	# 		return 0
+
 	def SQLiteVerifyEntry(self, TABLEname, siteURL):
 		'''Verify if entry still exist'''
-		#res = self.cur.execute('SELECT EXISTS (SELECT 1 FROM '+TABLEname+' WHERE siteURL='+"\""+siteURL+"\""+' LIMIT 1);')
 		res = self.cur.execute('SELECT EXISTS (SELECT 1 FROM '+TABLEname+' WHERE siteURL LIKE '+"\""+siteURL+"%\""+' LIMIT 1);')
 		fres = res.fetchone()[0]
 		# 0ô
@@ -57,7 +66,7 @@ class SqliteCmd(object):
 	def SQLiteInvestigCreateTable(self, InvTABLEname):
 		'''Creating Investigation Table if not exist'''
 		self.cur.execute('CREATE TABLE IF NOT EXISTS ' +InvTABLEname+ ' (siteURL TEXT NOT NULL PRIMARY KEY, siteDomain TEXT, IPaddress TEXT, ZipFileName TEXT, ZipFileHash TEXT, FirstSeentime TEXT, FirstSeenCode TEXT, LastSeentime TEXT, LastSeenCode TEXT, PageTitle TEXT)')
-
+		
 	def SQLiteInvestigInsert(self, InvTABLEname, siteURL, siteDomain, IPaddress, now, lastHTTPcode):
 		'''Insert new URL info into Investigation table'''
 		try:
@@ -81,7 +90,7 @@ class SqliteCmd(object):
 		self.cur.execute('UPDATE '+InvTABLEname+' SET LastSeentime=?, LastSeenCode=?  where siteURL=?;',(now, lastHTTPcode, siteURL))
 		self.conn.commit()
 
-	def SQLiteInvestigPageTitle(self, InvTABLEname, siteURL, PageTitle):
+	def SQLiteInvestigUpdateTitle(self, InvTABLEname, siteURL, PageTitle):
 		'''Add Page title in Investigation table'''
 		self.cur.execute('UPDATE '+InvTABLEname+' SET  PageTitle=? where siteURL=?;',(PageTitle, siteURL))
 		self.conn.commit()

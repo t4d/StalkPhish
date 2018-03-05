@@ -42,6 +42,10 @@ class SHA256:
 			err = sys.exc_info()
 			print("[!!!] Error in hashFile Class: " + str(err))
 
+	# def hashFile(self, filename):
+	# 	filehash = hashlib.sha256(b'filename').hexdigest()
+	# 	return filehash
+
 class UAgent:
 	'''Choose a random user-agent from a file'''
 	def ChooseUA(self, UAfile):

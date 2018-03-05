@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This file is part of StalkPhish - see https://github.com/t4d/StalkPhish
-
 import sys
 import sqlite3
 from tools.confparser import ConfParser
