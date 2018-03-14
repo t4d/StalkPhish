@@ -24,6 +24,7 @@ import glob
 import json
 import time
 import getopt
+import socket
 import logging
 import warnings
 import requests
@@ -36,7 +37,7 @@ from tools.utils import UAgent
 from tools.sqlite import SqliteCmd
 from tools.logging import Logger
 from tools.confparser import ConfParser
-VERSION = "0.9.2"
+VERSION = "0.9.3"
 
 # Graceful banner  :)
 def banner():
@@ -355,6 +356,17 @@ def main():
 		LOG.info("Download directory: "+DLDir)
 		LOG.info("Declared Proxy: "+str(PROXY)+"\n")
 		
+		# Test proxy connection
+		proxystring = PROXY.split('//')[1]
+		proxyipadd = proxystring.split(':')[0]
+		proxyport = proxystring.split(':')[1]
+		s = socket.socket()
+		try:
+			s.connect((proxyipadd, int(proxyport)))
+		except:
+			LOG.error("Proxy connection error, exiting!")
+			sys.exit(10)
+
 		# Modules launch
 		if OSINTsources is "YES":
 			LaunchModules()
