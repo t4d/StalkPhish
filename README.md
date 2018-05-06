@@ -10,6 +10,7 @@
 - use a hash of the phishing kit archive to identify the kit and threat
 - use timestamps for history
 - can use HTTP or SOCKS5 proxy (for downloading)
+- add just one url at a time into database
 
 ## OSINT modules
 * [urlscan.io](https://urlscan.io/about-api/) search API
@@ -21,8 +22,9 @@
 * Python 3
 * requests
 * PySocks
+* lxml
 
-## Upgrade StalkPhish v0.9 to v0.9.2
+## Upgrade StalkPhish v0.9 to v0.9.2 (or later)
 To update StalPhish v0.9 database, please change your DB schema, to add a new column, like this:
 ~~~
 $ sqlite3 db/StalkPhish.sqlite3
@@ -46,13 +48,14 @@ $ ./StalkPhish.py -h
  ____) | || (_| | |   <| |    | | | | \__ \ | | |
 |_____/ \__\__,_|_|_|\__\|    |_| |_|_|___/_| |_|
 
--= StalkPhish - The Phishing Kit stalker - v0.9 =-
+-= StalkPhish - The Phishing Kit stalker - v0.9.4 =-
 
 
     -h --help       Prints this help
-    -c --config     Configuration file to use
+    -c --config     Configuration file to use (mandatory)
     -G --get        Try to download zip file containing phishing kit sources (long and noisy)
     -N --nosint     Don't use OSINT databases
+    -u --url        Add only one URL
 ~~~
 
 ## Basic usage
@@ -66,7 +69,7 @@ $ ./StalkPhish.py -c conf/example.conf
  ____) | || (_| | |   <| |    | | | | \__ \ | | |
 |_____/ \__\__,_|_|_|\__\|    |_| |_|_|___/_| |_|
 
--= StalkPhish - The Phishing Kit stalker - v0.9 =-
+-= StalkPhish - The Phishing Kit stalker - v0.9.4 =-
 
 2018-01-28 14:43:31,892 - StalkPhish.py - INFO - Configuration file to use: conf/example.conf
 2018-01-28 14:43:31,893 - StalkPhish.py - INFO - Database: ./db/StalkPhish.sqlite3
@@ -95,7 +98,7 @@ $ ./StalkPhish.py -c conf/example.conf -G -N
  ____) | || (_| | |   <| |    | | | | \__ \ | | |
 |_____/ \__\__,_|_|_|\__\|    |_| |_|_|___/_| |_|
 
--= StalkPhish - The Phishing Kit stalker - v0.9 =-
+-= StalkPhish - The Phishing Kit stalker - v0.9.4 =-
 
 2018-01-28 14:45:23,072 - StalkPhish.py - INFO - Configuration file to use: conf/example.conf
 2018-01-28 14:45:23,073 - StalkPhish.py - INFO - Database: ./db/StalkPhish.sqlite3
