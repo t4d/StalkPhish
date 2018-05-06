@@ -35,9 +35,10 @@ from tools.utils import VerifyPath
 from tools.utils import SHA256
 from tools.utils import UAgent
 from tools.sqlite import SqliteCmd
+from tools.addurl import AddUniqueURL
 from tools.logging import Logger
 from tools.confparser import ConfParser
-VERSION = "0.9.3"
+VERSION = "0.9.4"
 
 # Graceful banner  :)
 def banner():
@@ -56,9 +57,10 @@ def banner():
 def usage():
 	usage = """
 	-h --help		Prints this help
-	-c --config		Configuration file to use
+	-c --config		Configuration file to use (mandatory)
 	-G --get 		Try to download zip file containing phishing kit sources (long and noisy)
 	-N --nosint 		Don't use OSINT databases
+	-u --url 		Add only one URL
 	"""
 	print(usage)
 	sys.exit(0)
@@ -68,14 +70,18 @@ def args_parse():
 	global ConfFile
 	global DLPhishingKit
 	global OSINTsources
+	global UniqueURL
+	global URLadd
 	confound="NO"
 	DLPhishingKit="NO"
 	OSINTsources = "YES"
+	UniqueURL = "NO"
+	URLadd = ""
 
 	if not len(sys.argv[1:]):
 		usage()
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "hNGc:", ["help", "nosint", "get", "conf="])
+		opts, args = getopt.getopt(sys.argv[1:], "hNGc:u:", ["help", "nosint", "get", "conf=", "url="])
 	except getopt.GetoptError as err:
 		print(err)
 		usage()
@@ -99,7 +105,9 @@ def args_parse():
 			OSINTsources = "NO"
 		elif o in ("-G", "--get"):
 			DLPhishingKit = "YES"
-
+		elif o in ("-u", "--url"):
+			UniqueURL = "YES"
+			URLadd = a
 		else:
 			assert False, "Unhandled Option"
 	return
@@ -366,6 +374,15 @@ def main():
 		except:
 			LOG.error("Proxy connection error, exiting!")
 			sys.exit(10)
+
+		# Only add URL into Database
+		if UniqueURL is "YES":
+			LOG.info("Add URL into database: {}".format(URLadd))
+			AddUniqueURL(URLadd,LOG,SQL,TABLEname,PROXY,UAFILE)
+			sys.stdout.flush()
+			os._exit(0)
+		else:
+			pass
 
 		# Modules launch
 		if OSINTsources is "YES":
