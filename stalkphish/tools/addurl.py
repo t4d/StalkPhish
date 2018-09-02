@@ -19,6 +19,11 @@ from tools.sqlite import SqliteCmd
 ## Data extraction
 def AddUniqueURL(URLadd,LOG,SQL,TABLEname,PROXY,UAFILE):
 	UAG = UAgent()
+	# add schema 
+	if not URLadd.startswith("http(|s)://") :
+		URLadd="http://{}".format(URLadd)
+	else:
+		pass
 	# remove URL containing UID-style strings
 	siteURL = re.split("(?:[0-9a-fA-F]:?){32}", URLadd.rstrip())[0]
 	## Test if entry still exist in DB
