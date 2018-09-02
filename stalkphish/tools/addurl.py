@@ -20,10 +20,11 @@ from tools.sqlite import SqliteCmd
 def AddUniqueURL(URLadd,LOG,SQL,TABLEname,PROXY,UAFILE):
 	UAG = UAgent()
 	# add schema 
-	if not URLadd.startswith("http(|s)://") :
-		URLadd="http://{}".format(URLadd)
-	else:
+	if URLadd.startswith("http://") or URLadd.startswith("https://"):
 		pass
+	else:
+		URLadd="http://{}".format(URLadd)
+
 	# remove URL containing UID-style strings
 	siteURL = re.split("(?:[0-9a-fA-F]:?){32}", URLadd.rstrip())[0]
 	## Test if entry still exist in DB
