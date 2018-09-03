@@ -166,11 +166,11 @@ $ docker-compose up --build -d
 
 The container is configured to keep interesting files into the host's /tmp directory.
 
-You can now execute shell and start launch StalkPhish:
+You can now execute shell and launch StalkPhish:
 ~~~
-$ docker exec -ti stalkphish bash
-root@stalkphish:/# cd /opt/StalkPhish/stalkphish/
-root@stalkphish:/opt/StalkPhish/stalkphish# ./StalkPhish.py -c conf/example.conf 
+$ docker exec -ti stalkphish sh
+/ # cd /opt/StalkPhish/stalkphish/
+/opt/StalkPhish/stalkphish # ./StalkPhish.py -c conf/example.conf
 ~~~
 
 ## Demo video
