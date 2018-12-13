@@ -5,6 +5,7 @@
 
 import sys
 import logging
+from logging.handlers import RotatingFileHandler
 
 
 def Logger(LogFile):
