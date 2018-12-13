@@ -3,64 +3,63 @@
 
 # This file is part of StalkPhish - see https://github.com/t4d/StalkPhish
 
-import os
 import sys
 import configparser
 
+
 class ConfParser:
-	'''Configuration file parser'''
-	def __init__(self, Confile=None):
-		try:
-			self.config = configparser.ConfigParser()
+    '''Configuration file parser'''
+    def __init__(self, Confile=None):
+        try:
+            self.config = configparser.ConfigParser()
 
-			with open(Confile, 'r', encoding='utf-8') as f:
-				self.config.readfp(f)
+            with open(Confile, 'r', encoding='utf-8') as f:
+                self.config.readfp(f)
 
-				# search string(s) (comma separated)
-				self.SearchString = self.config['SEARCH']['search']
+                # search string(s) (comma separated)
+                self.SearchString = self.config['SEARCH']['search']
 
-				## Databases
-				self.DatabaseDir = self.config['DATABASE']['Databases_files']
-				self.DBfile = self.config['DATABASE']['sqliteDB_filename']
-				self.TABLEname = self.config['DATABASE']['sqliteDB_tablename']
-				self.InvestigTABLEname = self.config['DATABASE']['sqliteDB_Investig_tablename']
+                # Databases
+                self.DatabaseDir = self.config['DATABASE']['Databases_files']
+                self.DBfile = self.config['DATABASE']['sqliteDB_filename']
+                self.TABLEname = self.config['DATABASE']['sqliteDB_tablename']
+                self.InvestigTABLEname = self.config['DATABASE']['sqliteDB_Investig_tablename']
 
-				## Paths
-				# Logging
-				self.LogConf = self.config['PATHS']['log_conf']
-				self.LogDir = self.config['PATHS']['log_dir']
-				self.LogFile = self.config['PATHS']['log_file']
+                # Paths
+                # Logging
+                self.LogConf = self.config['PATHS']['log_conf']
+                self.LogDir = self.config['PATHS']['log_dir']
+                self.LogFile = self.config['PATHS']['log_file']
 
-				self.DLDir = self.config['PATHS']['Kits_download_Dir']
-				self.SrcDir = self.config['PATHS']['Ext_src_Files']
+                self.DLDir = self.config['PATHS']['Kits_download_Dir']
+                self.SrcDir = self.config['PATHS']['Ext_src_Files']
 
-				# Proxy
-				try:
-					self.http_proxy = self.config['CONNECT']['http_proxy']
-				except:
-					self.http_proxy = None
+                # Proxy
+                try:
+                    self.http_proxy = self.config['CONNECT']['http_proxy']
+                except:
+                    self.http_proxy = None
 
-				self.http_UA = self.config['CONNECT']['http_UA']
-				self.UAfile = self.config['CONNECT']['UAfile']
+                self.http_UA = self.config['CONNECT']['http_UA']
+                self.UAfile = self.config['CONNECT']['UAfile']
 
-				# Modules
-				self.URLSCAN_active = self.config['URLSCAN'].getboolean('activate')
-				self.URLSCAN_url = self.config['URLSCAN']['API_url']
+                # Modules
+                self.URLSCAN_active = self.config['URLSCAN'].getboolean('activate')
+                self.URLSCAN_url = self.config['URLSCAN']['API_url']
 
-				self.URLQUERY_active = self.config['URLQUERY'].getboolean('activate')
-				self.URLQUERY_url = self.config['URLQUERY']['OSINT_url']
+                self.URLQUERY_active = self.config['URLQUERY'].getboolean('activate')
+                self.URLQUERY_url = self.config['URLQUERY']['OSINT_url']
 
-				self.PHISHTANK_active = self.config['PHISHTANK'].getboolean('activate')
-				self.PHISHTANK_url = self.config['PHISHTANK']['OSINT_url']
-				self.PHISHTANK_keep = self.config['PHISHTANK'].getboolean('keep_files')
+                self.PHISHTANK_active = self.config['PHISHTANK'].getboolean('activate')
+                self.PHISHTANK_url = self.config['PHISHTANK']['OSINT_url']
+                self.PHISHTANK_keep = self.config['PHISHTANK'].getboolean('keep_files')
 
-				self.OPENPHISH_active = self.config['OPENPHISH'].getboolean('activate')
-				self.OPENPHISH_url = self.config['OPENPHISH']['OSINT_url']
-				self.OPENPHISH_keep = self.config['OPENPHISH'].getboolean('keep_files')
+                self.OPENPHISH_active = self.config['OPENPHISH'].getboolean('activate')
+                self.OPENPHISH_url = self.config['OPENPHISH']['OSINT_url']
+                self.OPENPHISH_keep = self.config['OPENPHISH'].getboolean('keep_files')
 
-		except IOError:
-			print("[!!!] Configuration file Error: "+Confile)
-		except:
-			err = sys.exc_info()
-			print("[!!!] ConfParser Error: "+str(err))
-
+        except IOError:
+            print("[!!!] Configuration file Error: " + Confile)
+        except:
+            err = sys.exc_info()
+            print("[!!!] ConfParser Error: " + str(err))
