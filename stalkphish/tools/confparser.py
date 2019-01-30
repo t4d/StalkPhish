@@ -53,6 +53,10 @@ class ConfParser:
                 self.PHISHTANK_active = self.config['PHISHTANK'].getboolean('activate')
                 self.PHISHTANK_url = self.config['PHISHTANK']['OSINT_url']
                 self.PHISHTANK_keep = self.config['PHISHTANK'].getboolean('keep_files')
+                try:
+                    self.PHISHTANK_apikey = self.config['PHISHTANK']['API_key']
+                except:
+                    self.PHISHTANK_apikey = None
 
                 self.OPENPHISH_active = self.config['OPENPHISH'].getboolean('activate')
                 self.OPENPHISH_url = self.config['OPENPHISH']['OSINT_url']

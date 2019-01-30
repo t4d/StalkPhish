@@ -28,7 +28,7 @@ from tools.sqlite import SqliteCmd
 from tools.addurl import AddUniqueURL
 from tools.logging import Logger
 from tools.confparser import ConfParser
-VERSION = "0.9.5.1"
+VERSION = "0.9.5.2"
 
 
 # Graceful banner  :)
@@ -167,7 +167,16 @@ def LaunchModules():
         from modules.phishtank import PhishtankOSINT, PhishtankExtractor, DeletePhishtankFile
         ConfPHISHTANK_url = CONF.PHISHTANK_url
         ConfPHISHTANK_keep = CONF.PHISHTANK_keep
+        ConfPHISHTANK_apikey = CONF.PHISHTANK_apikey
         SearchString = CONF.SearchString
+
+        try:
+            if ConfPHISHTANK_apikey is not None:
+                ConfPHISHTANK_url = "https://data.phishtank.com/data/{}/online-valid.json".format(ConfPHISHTANK_apikey)
+                pass
+        except:
+            LOG.error("There's a problem with API key. Trying without...")
+            pass
 
         try:
             # Get PHISHTANK free feed (if older than 1 hour)

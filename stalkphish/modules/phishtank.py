@@ -24,9 +24,9 @@ def PhishtankOSINT(phishtank_file, ConfPHISHTANK_url, ConfPHISHTANK_keep, SrcDir
 
     # download PhishTank JSON file
     if str(resp.status_code) == "403":
-        LOG.error("PhishTank refused your connection (HTTP 403 code). Maybe Cloudflare asking for a captcha?")
+        LOG.error("PhishTank refused your connection (HTTP 403 code). Maybe Cloudflare asking for a captcha? Or there is an API key problem.")
         sys.exit(0)
-    # all is OK
+
     if str(resp.status_code) != "509":
         with open(phishtank_file, "wb") as file:
             file.write(resp.content)
