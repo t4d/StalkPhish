@@ -21,9 +21,20 @@ def PhishtankOSINT(phishtank_file, ConfPHISHTANK_url, ConfPHISHTANK_keep, SrcDir
     proxies = {'http': PROXY, 'https': PROXY}
     LOG.info("Retrieving Phishtank JSON file (" + ConfPHISHTANK_url + ") ... Could take several minutes...")
     resp = requests.get(url=ConfPHISHTANK_url, proxies=proxies, allow_redirects=True)
-    with open(phishtank_file, "wb") as file:
-        file.write(resp.content)
-        LOG.info("Phishtank\'s file retrieved. Proceeding to extraction...")
+
+    # download PhishTank JSON file
+    if str(resp.status_code) == "403":
+        LOG.error("PhishTank refused your connection (HTTP 403 code). Maybe Cloudflare asking for a captcha?")
+        sys.exit(0)
+    # all is OK
+    if str(resp.status_code) != "509":
+        with open(phishtank_file, "wb") as file:
+            file.write(resp.content)
+            LOG.info("Phishtank\'s file retrieved. Proceeding to extraction...")
+    # Error if download limit exceeded
+    else:
+        LOG.error("PhishTank download limit exceeded. Can't download JSON file. Maybe you should use an API key?")
+        sys.exit(0)
 
 
 def PhishtankExtractor(phishtank_file, SearchString, LOG, SQL, TABLEname, PROXY, UAFILE):

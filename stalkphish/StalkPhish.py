@@ -28,7 +28,7 @@ from tools.sqlite import SqliteCmd
 from tools.addurl import AddUniqueURL
 from tools.logging import Logger
 from tools.confparser import ConfParser
-VERSION = "0.9.5"
+VERSION = "0.9.5.1"
 
 
 # Graceful banner  :)
@@ -202,7 +202,9 @@ def LaunchModules():
                 DeletePhishtankFile(phishtank_file, LOG)
             else:
                 pass
-
+        # if sys.exit() from Phishtank module
+        except SystemExit:
+            pass
         except:
             err = sys.exc_info()
             LOG.error("Phishtank module error: " + str(err))
