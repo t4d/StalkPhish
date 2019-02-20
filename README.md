@@ -6,20 +6,21 @@
 ## Features
 - find URL where a phishing kit is deployed (from OSINT databases)
 - find if the phishing kit is still up and running
-- try to download phishing kit sources
+- try to download phishing kit sources (trying to find .zip file)
 - use a hash of the phishing kit archive to identify the kit and threat
 - use timestamps for history
-- can use HTTP or SOCKS5 proxy (for downloading)
+- can use HTTP or SOCKS5 proxy (for downloads)
 - add just one url at a time into database
 
 ## OSINT modules
 * [urlscan.io](https://urlscan.io/about-api/) search API
 * [urlquery.net](https://urlquery.net/search) search web crawler
-* [Phishtank](https://www.phishtank.com/developer_info.php) free OSINT feed
+* [Phishtank](https://www.phishtank.com/developer_info.php) free OSINT feed (with or without API key)
 * [Openphish](https://openphish.com/phishing_feeds.html) free OSINT feed
 
 ## Requirements
 * Python 3
+* BeautifulSoup4
 * requests
 * PySocks
 * lxml
@@ -48,8 +49,7 @@ $ ./StalkPhish.py -h
  ____) | || (_| | |   <| |    | | | | \__ \ | | |
 |_____/ \__\__,_|_|_|\__\|    |_| |_|_|___/_| |_|
 
--= StalkPhish - The Phishing Kit stalker - v0.9.4 =-
-
+-= StalkPhish - The Phishing Kit stalker - v0.9.5.3 =-
 
     -h --help       Prints this help
     -c --config     Configuration file to use (mandatory)
@@ -69,7 +69,7 @@ $ ./StalkPhish.py -c conf/example.conf
  ____) | || (_| | |   <| |    | | | | \__ \ | | |
 |_____/ \__\__,_|_|_|\__\|    |_| |_|_|___/_| |_|
 
--= StalkPhish - The Phishing Kit stalker - v0.9.4 =-
+-= StalkPhish - The Phishing Kit stalker - v0.9.5.3 =-
 
 2018-01-28 14:43:31,892 - StalkPhish.py - INFO - Configuration file to use: conf/example.conf
 2018-01-28 14:43:31,893 - StalkPhish.py - INFO - Database: ./db/StalkPhish.sqlite3
@@ -98,7 +98,7 @@ $ ./StalkPhish.py -c conf/example.conf -G -N
  ____) | || (_| | |   <| |    | | | | \__ \ | | |
 |_____/ \__\__,_|_|_|\__\|    |_| |_|_|___/_| |_|
 
--= StalkPhish - The Phishing Kit stalker - v0.9.4 =-
+-= StalkPhish - The Phishing Kit stalker - v0.9.5.3 =-
 
 2018-01-28 14:45:23,072 - StalkPhish.py - INFO - Configuration file to use: conf/example.conf
 2018-01-28 14:45:23,073 - StalkPhish.py - INFO - Database: ./db/StalkPhish.sqlite3
