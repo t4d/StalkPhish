@@ -4,6 +4,7 @@
 # This file is part of StalkPhish - see https://github.com/t4d/StalkPhish
 
 import requests
+from bs4 import BeautifulSoup
 import os
 import re
 import sys
@@ -15,9 +16,53 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
+def PKDownloadOpenDir(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE):
+    global Ziplst
+    proxies = {'http': PROXY, 'https': PROXY}
+    UAG = UAgent()
+    UA = UAG.ChooseUA(UAFILE)
+    user_agent = {'User-agent': UA}
+    now = str(TimestampNow().Timestamp())
+    SHA = SHA256()
+    Ziplst=[]
+
+    rhtml = requests.get(siteURL, headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
+    thtml = BeautifulSoup(rhtml.text, 'html.parser')
+    PageTitle = thtml.title.text
+    thtmlatag = thtml.select('a')
+    Ziplst += [siteURL + "/" + tag['href'] for tag in thtmlatag if '.zip' in tag.text]
+    for file in Ziplst:
+        try:
+            r = requests.get(file, headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
+            zzip = file.replace('/', '_').replace(':', '')
+            if "application/zip" in r.headers['content-type'] or "application/octet-stream" in r.headers['content-type']:
+                savefile = DLDir + zzip
+                # Still collected file
+                if os.path.exists(savefile):
+                    LOG.info("[DL ] Found still collected archive: " + savefile)
+                    return
+                # New file to download
+                else:
+                    LOG.info("[DL ] Found archive in an open dir, downloaded it as: " + savefile)
+                    with open(savefile, "wb") as code:
+                        code.write(r.content)
+                        pass
+                    ZipFileName = str(zzip)
+                    ZipFileHash = SHA.hashFile(savefile)
+                    SQL.SQLiteInvestigUpdatePK(InvTABLEname, siteURL, ZipFileName, ZipFileHash, now, lastHTTPcode)
+                    return
+            else:
+                pass
+        except requests.exceptions.ContentDecodingError:
+            LOG.error("[DL ] content-type error")
+        except:
+            pass
+
+
 # Connexion tests, Phishing kits downloadingd
 def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE):
     global ziplist
+    global PageTitle
     proxies = {'http': PROXY, 'https': PROXY}
     UAG = UAgent()
     UA = UAG.ChooseUA(UAFILE)
@@ -65,10 +110,12 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
             try:
                 if len(ziplist) >= 1:
                     rhtml = requests.get(siteURL, headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
-                    thtml = rhtml.text
-                    tit = re.search('<title>(.*?)</title>', thtml, re.IGNORECASE)
-                    if tit is not None:
-                        PageTitle = tit.group(1)
+                    thtml = BeautifulSoup(r.text, 'html.parser')
+                    try:
+                        PageTitle = thtml.title.text
+                    except:
+                        PageTitle = None
+                    if PageTitle is not None:
                         LOG.info(PageTitle)
                         SQL.SQLiteInvestigUpdateTitle(InvTABLEname, siteURL, PageTitle)
                     else:
@@ -82,7 +129,7 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
                 LOG.error("Get PageTitle Error: " + siteURL + str(err))
 
             try:
-                # Try too find and download phishing kit archive (.zip)
+                # Try to find and download phishing kit archive (.zip)
                 if len(ziplist) >= 1:
                     for zip in ziplist:
                         if (' = ' or '%' or '?' or '-' or '@') not in os.path.basename(os.path.normpath(zip)):
@@ -125,10 +172,21 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
                             except:
                                 err = sys.exc_info()
                                 LOG.error("Error: " + str(err))
-                                print("Error: " + str(err))
                                 pass
                             # else:
                             #   pass
+                            try:
+                                if PageTitle is not None:
+                                    if 'Index of' in PageTitle:
+                                        PKDownloadOpenDir(zip, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE)
+                                    else:
+                                        pass
+                                else:
+                                    pass
+                            except:
+                                err = sys.exc_info()
+                                LOG.error("Error: " + str(err))
+                                pass
                         else:
                             pass
                     else:
