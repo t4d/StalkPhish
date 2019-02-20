@@ -19,7 +19,7 @@ from tools.utils import UAgent
 def PhishtankOSINT(phishtank_file, ConfPHISHTANK_url, ConfPHISHTANK_keep, SrcDir, PROXY, LOG):
     # Get phishtank OSINT JSON file
     proxies = {'http': PROXY, 'https': PROXY}
-    LOG.info("Retrieving Phishtank JSON file (" + ConfPHISHTANK_url + ") ... Could take several minutes...")
+    LOG.info("Retrieving Phishtank's JSON file... Could take several minutes...")
     resp = requests.get(url=ConfPHISHTANK_url, proxies=proxies, allow_redirects=True)
 
     # download PhishTank JSON file
