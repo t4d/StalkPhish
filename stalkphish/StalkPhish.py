@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #   StalkPhish - The Phishing kits stalker
-#   Copyright (C) 2018 Thomas Damonneville
+#   Copyright (C) 2018-2019 Thomas Damonneville
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU Affero General Public License as
@@ -28,7 +28,7 @@ from tools.sqlite import SqliteCmd
 from tools.addurl import AddUniqueURL
 from tools.logging import Logger
 from tools.confparser import ConfParser
-VERSION = "0.9.5.2"
+VERSION = "0.9.5.3"
 
 
 # Graceful banner  :)
