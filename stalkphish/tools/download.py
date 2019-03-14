@@ -6,7 +6,8 @@
 import requests
 from bs4 import BeautifulSoup
 import os
-import re
+import io
+import zipfile
 import sys
 from urllib.parse import urlparse
 from tools.utils import TimestampNow
@@ -24,7 +25,7 @@ def PKDownloadOpenDir(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, D
     user_agent = {'User-agent': UA}
     now = str(TimestampNow().Timestamp())
     SHA = SHA256()
-    Ziplst=[]
+    Ziplst = []
 
     rhtml = requests.get(siteURL, headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
     thtml = BeautifulSoup(rhtml.text, 'html.parser')
@@ -35,7 +36,7 @@ def PKDownloadOpenDir(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, D
         try:
             r = requests.get(file, headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
             zzip = file.replace('/', '_').replace(':', '')
-            if "application/zip" in r.headers['content-type'] or "application/octet-stream" in r.headers['content-type']:
+            if zipfile.is_zipfile(io.BytesIO(r.content)):
                 savefile = DLDir + zzip
                 # Still collected file
                 if os.path.exists(savefile):
@@ -140,7 +141,7 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
                                     lastHTTPcode = str(rz.status_code)
                                     zzip = zip.replace('/', '_').replace(':', '')
                                     try:
-                                        if "application/zip" in rz.headers['content-type'] or "application/octet-stream" in rz.headers['content-type']:
+                                        if zipfile.is_zipfile(io.BytesIO(rz.content)):
                                             savefile = DLDir + zzip + '.zip'
                                             # Still collected file
                                             if os.path.exists(savefile):
