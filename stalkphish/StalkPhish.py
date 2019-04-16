@@ -371,15 +371,18 @@ def main():
         LOG.info("Declared Proxy: " + str(PROXY) + "\n")
 
         # Test proxy connection
-        proxystring = PROXY.split('//')[1]
-        proxyipadd = proxystring.split(':')[0]
-        proxyport = proxystring.split(':')[1]
-        s = socket.socket()
-        try:
-            s.connect((proxyipadd, int(proxyport)))
-        except:
-            LOG.error("Proxy connection error, exiting!")
-            sys.exit(10)
+        if PROXY:
+            proxystring = PROXY.split('//')[1]
+            proxyipadd = proxystring.split(':')[0]
+            proxyport = proxystring.split(':')[1]
+            s = socket.socket()
+            try:
+                s.connect((proxyipadd, int(proxyport)))
+            except:
+                LOG.error("Proxy connection error, exiting!")
+                sys.exit(10)
+        else:
+            pass
 
         # Only add URL into Database
         if UniqueURL is "YES":
