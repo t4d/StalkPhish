@@ -5,6 +5,7 @@
 
 import requests
 from bs4 import BeautifulSoup
+import re
 import os
 import io
 import zipfile
@@ -121,6 +122,7 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
                     except:
                         PageTitle = None
                     if PageTitle is not None:
+                        PageTitle = re.sub('\s+', ' ', PageTitle)
                         LOG.info(PageTitle)
                         SQL.SQLiteInvestigUpdateTitle(InvTABLEname, siteURL, PageTitle)
                     else:
@@ -129,13 +131,15 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
                 pass
             except requests.exceptions.ReadTimeout:
                 pass
+            except requests.exceptions.ConnectTimeout:
+                pass
             except:
                 err = sys.exc_info()
                 LOG.error("Get PageTitle Error: " + siteURL + str(err))
 
             try:
                 # Try to find and download phishing kit archive (.zip)
-                if len(ziplist) >= 1:
+                if len(ziplist) > 1:
                     for zip in ziplist:
                         if (' = ' or '%' or '?' or '-' or '@') not in os.path.basename(os.path.normpath(zip)):
                             try:
@@ -236,7 +240,22 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
     except requests.exceptions.MissingSchema:
         SQL.SQLiteInvestigUpdateCode(InvTABLEname, siteURL, now, 'Malformed URL')
         SQL.SQLiteInsertStillTryDownload(TABLEname, siteURL)
-        LOG.debug("Malformed URL, skipping: " + siteURL + "\n")
+        LOG.debug("Malformed URL, skipping: " + siteURL)
+
+    except requests.exceptions.InvalidURL:
+        SQL.SQLiteInvestigUpdateCode(InvTABLEname, siteURL, now, 'Malformed URL')
+        SQL.SQLiteInsertStillTryDownload(TABLEname, siteURL)
+        LOG.debug("Malformed URL, skipping: " + siteURL)
+
+    except requests.exceptions.ChunkedEncodingError:
+        SQL.SQLiteInvestigUpdateCode(InvTABLEname, siteURL, now, 'Can\'t read data')
+        SQL.SQLiteInsertStillTryDownload(TABLEname, siteURL)
+        LOG.debug("Can't read data, skipping: " + siteURL)
+
+    except requests.exceptions.TooManyRedirects:
+        SQL.SQLiteInvestigUpdateCode(InvTABLEname, siteURL, now, 'Too many redirects')
+        SQL.SQLiteInsertStillTryDownload(TABLEname, siteURL)
+        LOG.debug("Too many redirects, skipping: " + siteURL)
 
     except:
         err = sys.exc_info()
