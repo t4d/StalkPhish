@@ -35,7 +35,11 @@ def PKDownloadOpenDir(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, D
     for file in Ziplst:
         try:
             r = requests.get(file, headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
-            zzip = file.replace('/', '_').replace(':', '')
+            lastHTTPcode = str(r.status_code)
+            if len(zip) > 250:
+                zzip = zip.replace('/', '_').replace(':', '')[:250]
+            else:
+                zzip = zip.replace('/', '_').replace(':', '')
             if zipfile.is_zipfile(io.BytesIO(r.content)):
                 savefile = DLDir + zzip
                 # Still collected file
@@ -139,7 +143,10 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
                                 rz = requests.get(zip + ".zip", headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
                                 if str(rz.status_code) != "404":
                                     lastHTTPcode = str(rz.status_code)
-                                    zzip = zip.replace('/', '_').replace(':', '')
+                                    if len(zip) > 250:
+                                        zzip = zip.replace('/', '_').replace(':', '')[:250]
+                                    else:
+                                        zzip = zip.replace('/', '_').replace(':', '')
                                     try:
                                         if zipfile.is_zipfile(io.BytesIO(rz.content)):
                                             savefile = DLDir + zzip + '.zip'
