@@ -24,11 +24,12 @@ import time
 import getopt
 import socket
 from tools.utils import VerifyPath
+from tools.utils import NetInfo
 from tools.sqlite import SqliteCmd
 from tools.addurl import AddUniqueURL
 from tools.logging import Logger
 from tools.confparser import ConfParser
-VERSION = "0.9.5.3"
+VERSION = "0.9.6"
 
 
 # Graceful banner  :)
@@ -51,7 +52,7 @@ def usage():
     -h --help       Prints this help
     -c --config     Configuration file to use (mandatory)
     -G --get        Try to download zip file containing phishing kit sources (long and noisy)
-    -N --nosint         Don't use OSINT databases
+    -N --nosint     Don't use OSINT databases
     -u --url        Add only one URL
     """
     print(usage)
@@ -155,7 +156,7 @@ def LaunchModules():
 
         for SearchString in SearchString_list:
             UrlqueryOSINT(ConfURLQUERY_url, PROXY, SearchString, LOG)
-            UrlqueryExtractor(LOG, SQL, TABLEname, PROXY, UAFILE)
+            UrlqueryExtractor(SearchString, LOG, SQL, TABLEname, PROXY, UAFILE)
     else:
         pass
 
@@ -283,13 +284,18 @@ def TryDLPK(TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE):
         for row in rows:
             siteDomain = row[1]
             IPaddress = row[2]
+            if IPaddress:
+                rASN = NetInfo()
+                ASN = rASN.GetASN(IPaddress).strip('\"')
+            else:
+                ASN = None
             if row[0].startswith('https'):
                 siteURL = row[0]
             if row[0].startswith('http'):
                 siteURL = str(row[0])
             else:
                 siteURL = 'http://' + row[0]
-            TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE)
+            TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE, ASN)
     except:
         err = sys.exc_info()
         LOG.error("TryDLPK module error: " + str(err))
@@ -350,6 +356,7 @@ def ConfAnalysis(ConfFile):
         err = sys.exc_info()
         LOG.error("ConfAnalysis error " + str(err))
 
+
 # Main
 def main():
     global SQL
@@ -380,7 +387,7 @@ def main():
                 s.connect((proxyipadd, int(proxyport)))
             except:
                 LOG.error("Proxy connection error, exiting!")
-                sys.exit(10)
+                os._exit(1)
         else:
             pass
 
@@ -405,6 +412,10 @@ def main():
             TryDLPK(TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE)
         else:
             pass
+
+    except KeyboardInterrupt:
+        LOG.info("Shutdown requested...exiting")
+        os._exit(0)
 
     except:
         err = sys.exc_info()

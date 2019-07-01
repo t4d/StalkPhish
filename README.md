@@ -6,11 +6,14 @@
 ## Features
 - find URL where a phishing kit is deployed (from OSINT databases)
 - find if the phishing kit is still up and running
+- generate hash of page
 - try to download phishing kit sources (trying to find .zip file)
 - use a hash of the phishing kit archive to identify the kit and threat
+- extract e-mails found in phishing kit
 - use timestamps for history
 - can use HTTP or SOCKS5 proxy (for downloads)
 - add just one url at a time into database
+- store AS number in database
 
 ## OSINT modules
 * [urlscan.io](https://urlscan.io/about-api/) search API
@@ -24,6 +27,15 @@
 * requests
 * PySocks
 * lxml
+
+## Upgrade StalkPhish to 0.9.6
+Database schema changed (one more time :) for adding the ASnumber, a page hash, and a new column which contains e-mails extracted from Phishing kit's zip, you can modify your existing database like this:
+~~~
+$ sqlite3 db/StalkPhish.sqlite3 (take care to adapt your tables names)
+sqlite> ALTER TABLE StalkPhish ADD COLUMN page_hash TEXT;
+sqlite> ALTER TABLE StalkPhish ADD COLUMN ASN TEXT;
+sqlite> ALTER TABLE StalkPhishInvestig ADD COLUMN extracted_emails TEXT;
+~~~
 
 ## Upgrade StalkPhish v0.9 to v0.9.2 (or later)
 To update StalPhish v0.9 database, please change your DB schema, to add a new column, like this:
@@ -49,13 +61,15 @@ $ ./StalkPhish.py -h
  ____) | || (_| | |   <| |    | | | | \__ \ | | |
 |_____/ \__\__,_|_|_|\__\|    |_| |_|_|___/_| |_|
 
--= StalkPhish - The Phishing Kit stalker - v0.9.5.3 =-
+-= StalkPhish - The Phishing Kit stalker - v0.9.6 =-
+
 
     -h --help       Prints this help
     -c --config     Configuration file to use (mandatory)
     -G --get        Try to download zip file containing phishing kit sources (long and noisy)
-    -N --nosint     Don't use OSINT databases
+    -N --nosint         Don't use OSINT databases
     -u --url        Add only one URL
+
 ~~~
 
 ## Basic usage
@@ -69,22 +83,25 @@ $ ./StalkPhish.py -c conf/example.conf
  ____) | || (_| | |   <| |    | | | | \__ \ | | |
 |_____/ \__\__,_|_|_|\__\|    |_| |_|_|___/_| |_|
 
--= StalkPhish - The Phishing Kit stalker - v0.9.5.3 =-
+-= StalkPhish - The Phishing Kit stalker - v0.9.6 =-
 
-2018-01-28 14:43:31,892 - StalkPhish.py - INFO - Configuration file to use: conf/example.conf
-2018-01-28 14:43:31,893 - StalkPhish.py - INFO - Database: ./db/StalkPhish.sqlite3
-2018-01-28 14:43:31,894 - StalkPhish.py - INFO - Main table: StalkPhish
-2018-01-28 14:43:31,903 - StalkPhish.py - INFO - Investigation table: StalkPhishInvestig
-2018-01-28 14:43:31,912 - StalkPhish.py - INFO - Files directory: ./files/
-2018-01-28 14:43:31,912 - StalkPhish.py - INFO - Download directory: ./dl/
-2018-01-28 14:43:31,913 - StalkPhish.py - INFO - Declared Proxy: socks5://127.0.0.1:9050
+2019-06-18 21:01:16,234 - StalkPhish.py - INFO - Configuration file to use: conf/example.conf
+2019-06-18 21:01:16,234 - StalkPhish.py - INFO - Database: ./test/db/StalkPhish.sqlite3
+2019-06-18 21:01:16,234 - StalkPhish.py - INFO - Main table: StalkPhish
+2019-06-18 21:01:16,235 - StalkPhish.py - INFO - Investigation table: StalkPhishInvestig
+2019-06-18 21:01:16,235 - StalkPhish.py - INFO - Files directory: ./test/files/
+2019-06-18 21:01:16,235 - StalkPhish.py - INFO - Download directory: ./test/dl/
+2019-06-18 21:01:16,235 - StalkPhish.py - INFO - Declared Proxy: socks5://127.0.0.1:9050
 
-2018-01-28 14:43:31,913 - StalkPhish.py - INFO - Proceeding to OSINT modules launch
-2018-01-28 14:43:34,406 - urlscan.py - INFO - Searching for 'webmail'...
-2018-01-28 14:43:36,394 - urlscan.py - INFO - http://finvic.org.au/wp-admin/network/webmail2/webmail/webmail.php finvic.org.au 27.121.64.82 https://urlscan.io/result/065e1ee4-9872-4c77-a12c-67b4f1c394fe Sun Jan 28 14:43:34 2018 200
-2018-01-28 14:43:39,732 - urlscan.py - INFO - https://www.futures.com.tw/components/webmail/po/optus/page2.htm www.futures.com.tw 103.1.220.17 https://urlscan.io/result/fbd0e09a-635d-4a48-b023-dca4576a8031 Sun Jan 28 14:43:37 2018 500
-2018-01-28 14:43:40,766 - urlscan.py - INFO - http://digidom.com/Mailbox/webmail.php digidom.com 69.89.31.123 https://urlscan.io/result/3e0624d6-279d-4d3e-81ff-ea5720608ced Sun Jan 28 14:43:39 2018 200
-2018-01-28 14:43:42,212 - urlscan.py - INFO - http://finvic.org.au/wp-content/themes/webmail2/webmail/webmail.php finvic.org.au 27.121.64.82 https://urlscan.io/result/9ed37b75-2dd2-4458-832a-0d72a6bccde4 Sun Jan 28 14:43:40 2018 200
+2019-06-18 21:01:16,236 - StalkPhish.py - INFO - Proceeding to OSINT modules launch
+2019-06-18 21:01:19,102 - urlscan.py - INFO - Searching for 'paypal'...
+2019-06-18 21:01:27,460 - urlscan.py - INFO - https://icovil.com/ icovil.com 51.255.74.219 https://urlscan.io/result/25f6bd07-6fac-49af-a6b3-17cbd5fa937c Tue Jun 18 21:01:19 2019 200
+2019-06-18 21:01:30,747 - urlscan.py - INFO - http://www.mcseaonline.org/?page_id=4911 www.mcseaonline.org 108.166.135.154 https://urlscan.io/result/a37700f1-86fd-41b2-8c16-5e9b693b7ac8 Tue Jun 18 21:01:27 2019 200
+t/38327c8b-a1b9-4919-8037-ddf88238c16c Tue Jun 18 21:03:13 2019 timeout
+2019-06-18 21:03:25,836 - urlquery.py - INFO - http://www.killerknuts.com/ www.killerknuts.com 107.180.58.58 https://urlquery.net/report/d9d48c99-dfe5-4002-8a8a-08d44d71ffc2 Tue Jun 18 21:03:20 2019 timeout
+2019-06-18 21:03:33,757 - urlquery.py - INFO - https://www.crowdholding.com/ www.crowdholding.com 34.214.183.67 https://urlquery.net/report/b9a09c39-50df-4709-a709-bbcb897c7b96 Tue Jun 18 21:03:25 2019 timeout
+2019-06-18 21:03:46,524 - urlquery.py - INFO - http://downlinebooster.ontraport.com/c/s/JZH/jc8b/6/ji/xlj/6hq0Nr/zWarhzzuCJ/P/P/P downlinebooster.ontraport.com 209.170.211.179 https://urlquery.net/report/dc3aa6b1-be7b-409b-8890-7dad962d6063 Tue Jun 18 21:03:33 2019 200
+[...]
 ~~~
 
 ## Advanced usage (find phishing kits sources)
@@ -98,52 +115,51 @@ $ ./StalkPhish.py -c conf/example.conf -G -N
  ____) | || (_| | |   <| |    | | | | \__ \ | | |
 |_____/ \__\__,_|_|_|\__\|    |_| |_|_|___/_| |_|
 
--= StalkPhish - The Phishing Kit stalker - v0.9.5.3 =-
+-= StalkPhish - The Phishing Kit stalker - v0.9.6 =-
 
-2018-01-28 14:45:23,072 - StalkPhish.py - INFO - Configuration file to use: conf/example.conf
-2018-01-28 14:45:23,073 - StalkPhish.py - INFO - Database: ./db/StalkPhish.sqlite3
-2018-01-28 14:45:23,073 - StalkPhish.py - INFO - Main table: StalkPhish
-2018-01-28 14:45:23,074 - StalkPhish.py - INFO - Investigation table: StalkPhishInvestig
-2018-01-28 14:45:23,074 - StalkPhish.py - INFO - Files directory: ./files/
-2018-01-28 14:45:23,074 - StalkPhish.py - INFO - Download directory: ./dl/
-2018-01-28 14:45:23,074 - StalkPhish.py - INFO - Declared Proxy: socks5://127.0.0.1:9050
+2019-06-18 20:56:52,818 - StalkPhish.py - INFO - Configuration file to use: conf/example.conf
+2019-06-18 20:56:52,818 - StalkPhish.py - INFO - Database: ./test/db/StalkPhish.sqlite3
+2019-06-18 20:56:52,818 - StalkPhish.py - INFO - Main table: StalkPhish
+2019-06-18 20:56:52,819 - StalkPhish.py - INFO - Investigation table: StalkPhishInvestig
+2019-06-18 20:56:52,819 - StalkPhish.py - INFO - Files directory: ./test/files/
+2019-06-18 20:56:52,819 - StalkPhish.py - INFO - Download directory: ./test/dl/
+2019-06-18 20:56:52,819 - StalkPhish.py - INFO - Declared Proxy: socks5://127.0.0.1:9050
 
-2018-01-28 14:45:24,593 - download.py - INFO - [200] http://finvic.org.au/wp-admin/network/webmail2/webmail/webmail.php
-2018-01-28 14:45:24,607 - download.py - INFO - trying http://finvic.org.au/wp-admin.zip
-2018-01-28 14:45:30,318 - download.py - INFO - trying http://finvic.org.au/wp-admin/network.zip
-2018-01-28 14:45:36,063 - download.py - INFO - trying http://finvic.org.au/wp-admin/network/webmail2.zip
-2018-01-28 14:45:37,333 - download.py - INFO - [DL ] Found archive, downloaded it as: ./dl/http__finvic.org.au_wp-admin_network_webmail2.zip
-2018-01-28 14:45:37,341 - download.py - INFO - trying http://finvic.org.au/wp-admin/network/webmail2/webmail.zip
-2018-01-28 14:45:42,647 - download.py - INFO - trying http://finvic.org.au/wp-admin/network/webmail2/webmail/webmail.php.zip
-2018-01-28 14:45:51,024 - download.py - INFO - [500] https://www.futures.com.tw/components/webmail/po/optus/page2.htm
-2018-01-28 14:45:51,819 - download.py - INFO - [200] http://digidom.com/Mailbox/webmail.php
-2018-01-28 14:45:51,832 - download.py - INFO - trying http://digidom.com/Mailbox.zip
-2018-01-28 14:45:52,744 - download.py - INFO - trying http://digidom.com/Mailbox/webmail.php.zip
-2018-01-28 14:45:55,071 - download.py - INFO - [200] http://finvic.org.au/wp-content/themes/webmail2/webmail/webmail.php
-2018-01-28 14:45:55,079 - download.py - INFO - trying http://finvic.org.au/wp-content.zip
+2019-06-18 20:56:52,819 - StalkPhish.py - INFO - Starting trying to download phishing kits sources...
+2019-06-18 20:56:55,086 - download.py - INFO - [200] http://donnarogersimagery.com/wp-includes/pomo/login.alibaba.com/
+2019-06-18 20:56:56,925 - download.py - INFO - Alibaba Manufacturer Directory - Suppliers, Manufacturers, Exporters &amp; Importers
+2019-06-18 20:56:56,934 - download.py - INFO - trying http://donnarogersimagery.com/wp-includes.zip
+2019-06-18 20:57:00,663 - download.py - INFO - trying http://donnarogersimagery.com/wp-includes/pomo.zip
+2019-06-18 20:57:04,709 - download.py - INFO - trying http://donnarogersimagery.com/wp-includes/pomo/login.alibaba.com.zip
+2019-06-18 20:57:12,643 - download.py - INFO - [DL ] Found archive, downloaded it as: ./test/dl/http__donnarogersimagery.com_wp-includes_pomo_login.alibaba.com.zip
+2019-06-18 20:57:12,677 - download.py - INFO - [Email] Found: shaddyokoh@hotmail.com
+[...]
 ~~~
 
 ## SQLite3 database schema
 ~~~
 $ sqlite3 ./db/StalkPhish.sqlite3 .schema
-CREATE TABLE StalkPhish (siteURL TEXT NOT NULL PRIMARY KEY, siteDomain TEXT, IPaddress TEXT, SRClink TEXT, time TEXT, lastHTTPcode TEXT, StillInvestig TEXT, StillTryDownload TEXT);
-CREATE TABLE StalkPhishInvestig (siteURL TEXT NOT NULL PRIMARY KEY, siteDomain TEXT, IPaddress TEXT, ZipFileName TEXT, ZipFileHash TEXT, FirstSeentime TEXT, FirstSeenCode TEXT, LastSeentime TEXT, LastSeenCode TEXT, PageTitle TEXT);
+CREATE TABLE StalkPhish (siteURL TEXT NOT NULL PRIMARY KEY, siteDomain TEXT, IPaddress TEXT, SRClink TEXT, time TEXT, lastHTTPcode TEXT, StillInvestig TEXT, StillTryDownload TEXT, page_hash TEXT, ASN TEST);
+CREATE TABLE StalkPhishInvestig (siteURL TEXT NOT NULL PRIMARY KEY, siteDomain TEXT, IPaddress TEXT, ZipFileName TEXT, ZipFileHash TEXT, FirstSeentime TEXT, FirstSeenCode TEXT, LastSeentime TEXT, LastSeenCode TEXT, PageTitle TEXT, extracted_emails TEXT);
 ~~~
 
 ## SQLite3 'main' table sample example
 ~~~
 $ sqlite3 ./db/StalkPhish.sqlite3 'select * from StalkPhish'
-http://finvic.org.au/wp-admin/network/webmail2/webmail/webmail.php|finvic.org.au|27.121.64.82|https://urlscan.io/result/065e1ee4-9872-4c77-a12c-67b4f1c394fe|Sun Jan 28 14:43:34 2018|200||Y
-https://www.futures.com.tw/components/webmail/po/optus/page2.htm|www.futures.com.tw|103.1.220.17|https://urlscan.io/result/fbd0e09a-635d-4a48-b023-dca4576a8031|Sun Jan 28 14:43:37 2018|500||
-http://digidom.com/Mailbox/webmail.php|digidom.com|69.89.31.123|https://urlscan.io/result/3e0624d6-279d-4d3e-81ff-ea5720608ced|Sun Jan 28 14:43:39 2018|200||Y
-http://finvic.org.au/wp-content/themes/webmail2/webmail/webmail.php|finvic.org.au|27.121.64.82|https://urlscan.io/result/9ed37b75-2dd2-4458-832a-0d72a6bccde4|Sun Jan 28 14:43:40 2018|200||Y
+https://detoerreoejne.dk/|detoerreoejne.dk|145.239.118.80|https://urlscan.io/result/5b34a3c8-5737-43a4-aad1-87730aff71a8|Tue Jun 18 19:46:25 2019|200||Y|a65b00058ccc76657864fa74accaac5c0b46fa04|16276
+https://www.facebook.com/PayPal/?_rdc=1&_rdr|www.facebook.com|157.240.21.35|https://urlscan.io/result/6a0cb6d9-193a-4581-899b-1a24f77ad941|Tue Jun 18 19:46:29 2019|200||Y|14014fdef8dc11407fc4985dc2f35ab73d9cf4b0|32934
+https://medium.com/@jhonrabig/watch-ambitions-season-1-episode-1-online-free-720px-9e3eebeab5e4|medium.com|104.16.120.127|https://urlquery.net/report/eb23e4fc-8684-400b-b0e4-df044c5914da|Tue Jun 18 19:46:40 2019|200||Y|27049fba4d5aea74e94b237213e93f33c8e90ee2|13335
+https://www.casualfilms.com/|www.casualfilms.com|104.17.128.180|https://urlquery.net/report/c39f40fb-c72f-493d-9b3b-867cbf855659|Tue Jun 18 19:46:43 2019|200||Y|8dfbac8bddd37bb719bf34e7aa60b22714af6b88|13335
+https://filecloud.filecloudonline.com/url/j4dja8pupuydjwiz?shareto=secure_message@icradvisor.com|filecloud.filecloudonline.com|34.197.99.39|https://urlquery.net/report/b6ea7ed4-1e77-4688-bd5f-fcb093d5ef62|Tue Jun 18 19:46:45 2019|200||Y|ebddf102f6ac72be2632a5778daf3848509a8901|14618
 ~~~
 
 ## SQLite3 'investigation' table sample example
 ~~~
 $ sqlite3 ./db/StalkPhish.sqlite3 'select * from StalkPhishInvestig'
-http://finvic.org.au/wp-admin/network/webmail2/webmail/webmail.php|finvic.org.au|27.121.64.82|http__finvic.org.au_wp-admin_network_webmail2.zip|d218ed391cb68fdcca9dd50e63b6dba510e581e89f7fe3393c4d06b5a52b5977|Sun Jan 28 14:45:23 2018|200|Sun Jan 28 14:45:23 2018|200|
-http://digidom.com/Mailbox/webmail.php|digidom.com|69.89.31.123|||Sun Jan 28 14:45:51 2018|200|||
+http://crm.simumak.com/custom/MDP1/aHR0cHM6Ly9jZnNwYXJ0LmltcG90cy5nb3/aWEyLXp1LW1hcGkvamF2YXguZmFjZXMucmVzb3VyY2UvY29tcG9uZW50cy5jc3MueGh0bWw/bG49cHJpbWVmYWNlcyZ2PTYuMQ/Formulaire/72ce7|crm.simumak.com|199.89.53.193|||Sun Jun 16 01:03:24 2019|200|||Particuliers | authentification|
+http://muviarts.in/ourtime/ourtimepge|muviarts.in|104.18.54.33|http__muviarts.in_ourtime_ourtimepge.zip|afd48d3db735e861f6a048132b62a4deecfc32a89269b192edbc709563855417|Sun Jun 16 01:03:33 2019|200|Sun Jun 16 01:03:33 2019|200|OurTime.com - The 50+ Single Network|youremailname@domain.com, rzult@otbox.ag
+http://twitter-signin.com/|twitter-signin.com|96.47.237.56|||Sun Jun 16 01:03:42 2019|200|||เข้าสู่ระบบทวิตเตอร์ / ทวิตเตอร์|
+https://servymain.cl/wp/wp-content/uploads/DP|servymain.cl|200.63.103.27|||Sun Jun 16 01:03:56 2019|200|||Dropbox | Access your documents from any device|
 ~~~
 
 ## Configuration file
@@ -174,4 +190,4 @@ $ docker exec -ti stalkphish sh
 ~~~
 
 ## Demo video
-[![StalkPhish v0.9 running video](https://img.youtube.com/vi/2YWLZSgrdp0/0.jpg)](https://www.youtube.com/watch?v=2YWLZSgrdp0)
+[![StalkPhish v0.9.6 running video](https://img.youtube.com/vi/2YWLZSgrdp0/0.jpg)](https://open.tube/videos/embed/79b9b1eb-4c75-42aa-a519-ee376d0b1341)

@@ -1,4 +1,5 @@
 BeautifulSoup4
 requests
 pysocks
+ipwhois
 lxml

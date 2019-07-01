@@ -4,10 +4,15 @@
 # This file is part of StalkPhish - see https://github.com/t4d/StalkPhish
 
 import os
+import re
 import sys
+import zipfile
 import datetime
 import hashlib
 import random
+from ipwhois.net import Net
+from ipwhois.asn import IPASN
+import json
 
 
 class TimestampNow:
@@ -56,3 +61,47 @@ class UAgent:
         except:
             err = sys.exc_info()
             print("[!!!] Problem with UserAgent Class: " + str(err))
+
+
+class NetInfo:
+    '''Retrieve network informations'''
+    def GetASN(self, IPaddress):
+        '''Retrieve AS Number of an IP address'''
+        try:
+            if IPaddress:
+                net = Net(IPaddress)
+                obj = IPASN(net)
+                res = obj.lookup()
+                IPasn = json.dumps(res["asn"])
+            else:
+                IPasn = None
+            return IPasn
+        except:
+            err = sys.exc_info()
+            print("[!!!] Problem with NetInfo Class: " + str(err))
+
+
+class ZipSearch:
+    '''Search for e-mail addresses into Zip file'''
+    def PKzipSearch(self, InvTABLEname, SQL, LOG, DLDir, savefile):
+        try:
+            # print(zipfile.getinfo(savefile))
+            if zipfile.is_zipfile(savefile):
+                file = zipfile.ZipFile(savefile, "r")
+                extracted_emails = []
+                for name in file.namelist():
+                    if re.findall("php$", name):
+                        scam_email2 = re.findall(r'[\w\.-]+@[\w\.-]+\.\w+', str(file.read(name)))
+                        for mailadd in scam_email2:
+                            if mailadd not in extracted_emails:
+                                extracted_emails.append(mailadd)
+                # Extracted scammers email
+                if any(map(len, extracted_emails)):
+                    return [extracted_emails]
+                else:
+                    LOG.info("No emails in this kit? Uglyyyyy ô0")
+                    pass
+            else:
+                LOG.info("{} is not a zip file...".format(savefile))
+        except Exception as e:
+            print("[!!!] Problem with PKzipSearch Class: " + str(e))

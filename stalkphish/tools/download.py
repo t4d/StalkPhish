@@ -10,15 +10,17 @@ import os
 import io
 import zipfile
 import sys
+import hashlib
 from urllib.parse import urlparse
 from tools.utils import TimestampNow
 from tools.utils import SHA256
 from tools.utils import UAgent
+from tools.utils import ZipSearch
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
-def PKDownloadOpenDir(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE):
+def PKDownloadOpenDir(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE, ASN):
     global Ziplst
     proxies = {'http': PROXY, 'https': PROXY}
     UAG = UAgent()
@@ -30,43 +32,63 @@ def PKDownloadOpenDir(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, D
 
     rhtml = requests.get(siteURL, headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
     thtml = BeautifulSoup(rhtml.text, 'html.parser')
-    PageTitle = thtml.title.text
+    try:
+        PageTitle = thtml.title.text.strip()
+    except:
+        PageTitle = None
+    if PageTitle is not None:
+        PageTitle = re.sub('\s+', ' ', PageTitle)
+        SQL.SQLiteInvestigUpdateTitle(InvTABLEname, siteURL, PageTitle)
+    else:
+        pass
+
     thtmlatag = thtml.select('a')
     Ziplst += [siteURL + "/" + tag['href'] for tag in thtmlatag if '.zip' in tag.text]
     for file in Ziplst:
         try:
             r = requests.get(file, headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
             lastHTTPcode = str(r.status_code)
-            if len(zip) > 250:
-                zzip = zip.replace('/', '_').replace(':', '')[:250]
+            # Reduce filename lenght
+            if len(file) > 250:
+                zzip = file.replace('/', '_').replace(':', '')[:250]
             else:
-                zzip = zip.replace('/', '_').replace(':', '')
-            if zipfile.is_zipfile(io.BytesIO(r.content)):
-                savefile = DLDir + zzip
-                # Still collected file
-                if os.path.exists(savefile):
-                    LOG.info("[DL ] Found still collected archive: " + savefile)
-                    return
-                # New file to download
+                zzip = file.replace('/', '_').replace(':', '')
+            try:
+                if zipfile.is_zipfile(io.BytesIO(r.content)):
+                    savefile = DLDir + zzip
+                    # Still collected file
+                    if os.path.exists(savefile):
+                        LOG.info("[DL ] Found still collected archive: " + savefile)
+                        return
+                    # New file to download
+                    else:
+                        LOG.info("[DL ] Found archive in an open dir, downloaded it as: " + savefile)
+                        with open(savefile, "wb") as code:
+                            code.write(r.content)
+                            pass
+                        ZipFileName = str(zzip + '.zip')
+                        ZipFileHash = SHA.hashFile(savefile)
+                        # Extract e-mails from downloaded file
+                        try:
+                            ZS = ZipSearch()
+                            extracted_emails = str(ZS.PKzipSearch(InvTABLEname, SQL, LOG, DLDir, savefile)).strip("[]").replace("'", "")
+                            LOG.info("[Emails] found: {}".format(extracted_emails))
+                            SQL.SQLiteInvestigInsertEmail(InvTABLEname, extracted_emails, ZipFileName)
+                        except Exception as e:
+                            LOG.info("Extracted emails exception: {}".format(e))
+                        return
+                        SQL.SQLiteInvestigUpdatePK(InvTABLEname, siteURL, ZipFileName, ZipFileHash, now, lastHTTPcode)
+                        return
                 else:
-                    LOG.info("[DL ] Found archive in an open dir, downloaded it as: " + savefile)
-                    with open(savefile, "wb") as code:
-                        code.write(r.content)
-                        pass
-                    ZipFileName = str(zzip)
-                    ZipFileHash = SHA.hashFile(savefile)
-                    SQL.SQLiteInvestigUpdatePK(InvTABLEname, siteURL, ZipFileName, ZipFileHash, now, lastHTTPcode)
-                    return
-            else:
-                pass
+                    pass
+            except Exception as e:
+                LOG.error("Error downloading file: {}".format(e))
         except requests.exceptions.ContentDecodingError:
             LOG.error("[DL ] content-type error")
-        except:
-            pass
 
 
 # Connexion tests, Phishing kits downloadingd
-def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE):
+def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE, ASN):
     global ziplist
     global PageTitle
     proxies = {'http': PROXY, 'https': PROXY}
@@ -87,6 +109,26 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
     # Let's try to find a phishing kit source archive
     try:
         r = requests.get(siteURL, headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
+        # Generate page hash
+        try:
+            soup = BeautifulSoup(r.content, 'lxml')
+            # Body hash only
+            # body = soup.find('body')
+            try:
+                #page_body = body.findChildren()
+                page_body = soup
+            except:
+                # print(r.content) ## print, frequently, JS in <head>
+                pass
+            try:
+                sha1 = hashlib.sha1()
+                sha1.update(repr(page_body).encode("utf-8"))
+                PageHash = sha1.hexdigest()
+                SQL.SQLiteInsertPageHash(TABLEname, siteURL, PageHash)
+            except:
+                pass
+        except Exception as e:
+            print(e)
 
         if (str(r.status_code) != "404"):
             LOG.info("[" + str(r.status_code) + "] " + r.url)
@@ -116,9 +158,9 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
             try:
                 if len(ziplist) >= 1:
                     rhtml = requests.get(siteURL, headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
-                    thtml = BeautifulSoup(r.text, 'html.parser')
+                    thtml = BeautifulSoup(rhtml.text, 'html.parser')
                     try:
-                        PageTitle = thtml.title.text
+                        PageTitle = thtml.title.text.strip()
                     except:
                         PageTitle = None
                     if PageTitle is not None:
@@ -147,6 +189,7 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
                                 rz = requests.get(zip + ".zip", headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
                                 if str(rz.status_code) != "404":
                                     lastHTTPcode = str(rz.status_code)
+                                    # Reduce filename lenght
                                     if len(zip) > 250:
                                         zzip = zip.replace('/', '_').replace(':', '')[:250]
                                     else:
@@ -167,6 +210,14 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
                                                 ZipFileName = str(zzip + '.zip')
                                                 ZipFileHash = SHA.hashFile(savefile)
                                                 SQL.SQLiteInvestigUpdatePK(InvTABLEname, siteURL, ZipFileName, ZipFileHash, now, lastHTTPcode)
+                                                # Extract e-mails from downloaded file
+                                                try:
+                                                    ZS = ZipSearch()
+                                                    extracted_emails = str(ZS.PKzipSearch(InvTABLEname, SQL, LOG, DLDir, savefile)).strip("[]").replace("'", "")
+                                                    LOG.info("[Email] Found: {}".format(extracted_emails))
+                                                    SQL.SQLiteInvestigInsertEmail(InvTABLEname, extracted_emails, ZipFileName)
+                                                except Exception as e:
+                                                    LOG.info("Extracted emails exception: {}".format(e))
                                                 return
                                         else:
                                             pass
@@ -181,23 +232,21 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
                                 LOG.debug("Connection Timeout: " + siteURL)
                             except requests.exceptions.ConnectTimeout:
                                 LOG.debug("Connection Timeout")
-                            except:
-                                err = sys.exc_info()
-                                LOG.error("Error: " + str(err))
+                            except Exception as e:
+                                LOG.error("Error Downloading zip: {}".format(e))
                                 pass
-                            # else:
-                            #   pass
+
+                            # Search for OpenDir
                             try:
                                 if PageTitle is not None:
                                     if 'Index of' in PageTitle:
-                                        PKDownloadOpenDir(zip, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE)
+                                        PKDownloadOpenDir(zip, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE, ASN)
                                     else:
                                         pass
                                 else:
                                     pass
-                            except:
-                                err = sys.exc_info()
-                                LOG.error("Error: " + str(err))
+                            except Exception as e:
+                                LOG.error("Potential OpenDir connection error: " + str(e))
                                 pass
                         else:
                             pass
@@ -206,9 +255,8 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
                 # Ziplist empty
                 else:
                     pass
-            except:
-                err = sys.exc_info()
-                LOG.error("DL Error: " + str(err))
+            except Exception as e:
+                LOG.error("DL Error: " + str(e))
 
         else:
             LOG.debug("[" + str(r.status_code) + "] " + r.url)
@@ -257,6 +305,9 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
         SQL.SQLiteInsertStillTryDownload(TABLEname, siteURL)
         LOG.debug("Too many redirects, skipping: " + siteURL)
 
-    except:
-        err = sys.exc_info()
-        LOG.error("Error: " + str(err))
+    except KeyboardInterrupt:
+        LOG.info("Shutdown requested...exiting")
+        os._exit(0)
+
+    except Exception as e:
+        LOG.error("Error trying to find kit: " + str(e))

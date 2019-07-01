@@ -16,11 +16,11 @@ class SqliteCmd(object):
     # Main DB operations
     def SQLiteCreateTable(self, TABLEname):
         '''Creating main Table if not exist'''
-        self.cur.execute('CREATE TABLE IF NOT EXISTS ' + TABLEname + ' (siteURL TEXT NOT NULL PRIMARY KEY, siteDomain TEXT, IPaddress TEXT, SRClink TEXT, time TEXT, lastHTTPcode TEXT, StillInvestig TEXT, StillTryDownload TEXT)')
+        self.cur.execute('CREATE TABLE IF NOT EXISTS ' + TABLEname + ' (siteURL TEXT NOT NULL PRIMARY KEY, siteDomain TEXT, IPaddress TEXT, SRClink TEXT, time TEXT, lastHTTPcode TEXT, StillInvestig TEXT, StillTryDownload TEXT, page_hash TEXT, ASN TEST)')
 
-    def SQLiteInsertPK(self, TABLEname, siteURL, siteDomain, IPaddress, SRClink, now, lastHTTPcode):
+    def SQLiteInsertPK(self, TABLEname, siteURL, siteDomain, IPaddress, SRClink, now, lastHTTPcode, ASN):
         '''Insert new Phishing Kit infos'''
-        self.cur.execute('INSERT OR IGNORE INTO ' + TABLEname + ' VALUES (?,?,?,?,?,?,?,?);', (siteURL, siteDomain, IPaddress, SRClink, now, lastHTTPcode, '', ''))
+        self.cur.execute('INSERT OR IGNORE INTO ' + TABLEname + ' VALUES (?,?,?,?,?,?,?,?,?,?);', (siteURL, siteDomain, IPaddress, SRClink, now, lastHTTPcode, '', '', '', ASN))
         self.conn.commit()
 
     def SQLiteInsertStillInvestig(self, TABLEname, siteURL):
@@ -42,15 +42,14 @@ class SqliteCmd(object):
             err = sys.exc_info()
             print("[!!!] SQLiteInsertStillTryDownload Error: " + str(err))
 
-    # def SQLiteVerifyEntry(self, TABLEname, siteURL):
-    #   '''Verify if entry still exist'''
-    #   res = self.cur.execute('SELECT EXISTS (SELECT 1 FROM '+TABLEname+' WHERE siteURL='+"\""+siteURL+"\""+' LIMIT 1);')
-    #   fres = res.fetchone()[0]
-    #   # 0ô
-    #   if fres is not 0:
-    #       return 1
-    #   else:
-    #       return 0
+    def SQLiteInsertPageHash(self, TABLEname, siteURL, PageHash):
+        '''Insert StillTryDownload changes'''
+        try:
+            self.cur.execute('UPDATE ' + TABLEname + ' SET page_hash=' + "\"" + PageHash + "\"" + ' WHERE siteURL LIKE ' + "\"" + siteURL + "%\"" + ';')
+            self.conn.commit()
+        except:
+            err = sys.exc_info()
+            print("[!!!] SQLiteInsertPageHash Error: " + str(err))
 
     def SQLiteVerifyEntry(self, TABLEname, siteURL):
         '''Verify if entry still exist'''
@@ -65,7 +64,7 @@ class SqliteCmd(object):
     # Investigation DB operations
     def SQLiteInvestigCreateTable(self, InvTABLEname):
         '''Creating Investigation Table if not exist'''
-        self.cur.execute('CREATE TABLE IF NOT EXISTS ' + InvTABLEname + ' (siteURL TEXT NOT NULL PRIMARY KEY, siteDomain TEXT, IPaddress TEXT, ZipFileName TEXT, ZipFileHash TEXT, FirstSeentime TEXT, FirstSeenCode TEXT, LastSeentime TEXT, LastSeenCode TEXT, PageTitle TEXT)')
+        self.cur.execute('CREATE TABLE IF NOT EXISTS ' + InvTABLEname + ' (siteURL TEXT NOT NULL PRIMARY KEY, siteDomain TEXT, IPaddress TEXT, ZipFileName TEXT, ZipFileHash TEXT, FirstSeentime TEXT, FirstSeenCode TEXT, LastSeentime TEXT, LastSeenCode TEXT, PageTitle TEXT, extracted_emails TEXT)')
 
     def SQLiteInvestigInsert(self, InvTABLEname, siteURL, siteDomain, IPaddress, now, lastHTTPcode):
         '''Insert new URL info into Investigation table'''
@@ -103,6 +102,10 @@ class SqliteCmd(object):
     def SQLiteDownloadedState(self, TABLEname, siteURL):
         '''Update new HTTP code infos in StillTryDownload column'''
         self.cur.execute('UPDATE ' + TABLEname + ' SET StillTryDownload=\'Y\'  where siteURL=?;', (siteURL,))
+        self.conn.commit()
+
+    def SQLiteInvestigInsertEmail(self, InvTABLEname, extracted_emails, ZipFileName):
+        self.cur.execute('UPDATE ' + InvTABLEname + ' SET  extracted_emails=? where ZipFileName=?;', (extracted_emails, ZipFileName))
         self.conn.commit()
 
     def SQLiteInvestigVerifyEntry(self, InvTABLEname, siteDomain, IPaddress):

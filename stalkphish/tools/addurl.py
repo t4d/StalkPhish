@@ -10,6 +10,7 @@ import requests
 from urllib.parse import urlparse
 from tools.utils import TimestampNow
 from tools.utils import UAgent
+from tools.utils import NetInfo
 
 
 # Data extraction
@@ -30,9 +31,12 @@ def AddUniqueURL(URLadd, LOG, SQL, TABLEname, PROXY, UAFILE):
         source_url = ""
         try:
             IPaddress = socket.gethostbyname(siteDomain)
+            rASN = NetInfo()
+            ASN = rASN.GetASN(IPaddress)
         # can't resolv
         except:
             IPaddress = ""
+            ASN = ""
 
         # HTTP connection
         try:
@@ -63,7 +67,7 @@ def AddUniqueURL(URLadd, LOG, SQL, TABLEname, PROXY, UAFILE):
 
         # Add data into database
         LOG.info(siteURL)
-        SQL.SQLiteInsertPK(TABLEname, siteURL, siteDomain, IPaddress, source_url, now, lastHTTPcode)
+        SQL.SQLiteInsertPK(TABLEname, siteURL, siteDomain, IPaddress, source_url, now, lastHTTPcode, ASN)
 
     else:
         LOG.info("Entry still known: " + siteURL)
