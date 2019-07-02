@@ -286,7 +286,10 @@ def TryDLPK(TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE):
             IPaddress = row[2]
             if IPaddress:
                 rASN = NetInfo()
-                ASN = rASN.GetASN(IPaddress).strip('\"')
+                if rASN.GetASN(IPaddress):
+                    ASN = rASN.GetASN(IPaddress).strip('\"')
+                else:
+                    ASN = None
             else:
                 ASN = None
             if row[0].startswith('https'):
