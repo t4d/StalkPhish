@@ -32,7 +32,7 @@ def AddUniqueURL(URLadd, LOG, SQL, TABLEname, PROXY, UAFILE):
         try:
             IPaddress = socket.gethostbyname(siteDomain)
             rASN = NetInfo()
-            ASN = rASN.GetASN(IPaddress)
+            ASN = rASN.GetASN(IPaddress).strip('\"')
         # can't resolv
         except:
             IPaddress = ""
