@@ -28,7 +28,7 @@ def AddUniqueURL(URLadd, LOG, SQL, TABLEname, PROXY, UAFILE):
     if SQL.SQLiteVerifyEntry(TABLEname, siteURL) is 0:
         now = str(TimestampNow().Timestamp())
         siteDomain = urlparse(URLadd).netloc
-        source_url = ""
+        source_url = "Manual"
         try:
             IPaddress = socket.gethostbyname(siteDomain)
             rASN = NetInfo()
