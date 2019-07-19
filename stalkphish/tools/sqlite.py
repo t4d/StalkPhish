@@ -16,7 +16,7 @@ class SqliteCmd(object):
     # Main DB operations
     def SQLiteCreateTable(self, TABLEname):
         '''Creating main Table if not exist'''
-        self.cur.execute('CREATE TABLE IF NOT EXISTS ' + TABLEname + ' (siteURL TEXT NOT NULL PRIMARY KEY, siteDomain TEXT, IPaddress TEXT, SRClink TEXT, time TEXT, lastHTTPcode TEXT, StillInvestig TEXT, StillTryDownload TEXT, page_hash TEXT, ASN TEST)')
+        self.cur.execute('CREATE TABLE IF NOT EXISTS ' + TABLEname + ' (siteURL TEXT NOT NULL PRIMARY KEY, siteDomain TEXT, IPaddress TEXT, SRClink TEXT, time TEXT, lastHTTPcode TEXT, StillInvestig TEXT, StillTryDownload TEXT, page_hash TEXT, ASN TEXT)')
 
     def SQLiteInsertPK(self, TABLEname, siteURL, siteDomain, IPaddress, SRClink, now, lastHTTPcode, ASN):
         '''Insert new Phishing Kit infos'''
