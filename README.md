@@ -28,7 +28,7 @@
 * PySocks
 * lxml
 
-## Upgrade StalkPhish to 0.9.6
+## Upgrade StalkPhish from <0.9.6
 Database schema changed (one more time :) for adding the ASnumber, a page hash, and a new column which contains e-mails extracted from Phishing kit's zip, you can modify your existing database like this:
 ~~~
 $ sqlite3 db/StalkPhish.sqlite3 (take care to adapt your tables names)
@@ -61,14 +61,15 @@ $ ./StalkPhish.py -h
  ____) | || (_| | |   <| |    | | | | \__ \ | | |
 |_____/ \__\__,_|_|_|\__\|    |_| |_|_|___/_| |_|
 
--= StalkPhish - The Phishing Kit stalker - v0.9.6 =-
+-= StalkPhish - The Phishing Kit stalker - v0.9.7 =-
 
 
     -h --help       Prints this help
     -c --config     Configuration file to use (mandatory)
     -G --get        Try to download zip file containing phishing kit sources (long and noisy)
-    -N --nosint         Don't use OSINT databases
+    -N --nosint     Don't use OSINT databases
     -u --url        Add only one URL
+    -s --search     Search for a specific string on OSINT modules
 
 ~~~
 
@@ -83,7 +84,7 @@ $ ./StalkPhish.py -c conf/example.conf
  ____) | || (_| | |   <| |    | | | | \__ \ | | |
 |_____/ \__\__,_|_|_|\__\|    |_| |_|_|___/_| |_|
 
--= StalkPhish - The Phishing Kit stalker - v0.9.6 =-
+-= StalkPhish - The Phishing Kit stalker - v0.9.7 =-
 
 2019-06-18 21:01:16,234 - StalkPhish.py - INFO - Configuration file to use: conf/example.conf
 2019-06-18 21:01:16,234 - StalkPhish.py - INFO - Database: ./test/db/StalkPhish.sqlite3
@@ -104,7 +105,7 @@ t/38327c8b-a1b9-4919-8037-ddf88238c16c Tue Jun 18 21:03:13 2019 timeout
 [...]
 ~~~
 
-## Advanced usage (find phishing kits sources)
+## Advanced usage (try to 'G'et phishing kit zipfile, 'N'o OSINT search)
 ~~~
 $ ./StalkPhish.py -c conf/example.conf -G -N
 
@@ -115,7 +116,7 @@ $ ./StalkPhish.py -c conf/example.conf -G -N
  ____) | || (_| | |   <| |    | | | | \__ \ | | |
 |_____/ \__\__,_|_|_|\__\|    |_| |_|_|___/_| |_|
 
--= StalkPhish - The Phishing Kit stalker - v0.9.6 =-
+-= StalkPhish - The Phishing Kit stalker - v0.9.7 =-
 
 2019-06-18 20:56:52,818 - StalkPhish.py - INFO - Configuration file to use: conf/example.conf
 2019-06-18 20:56:52,818 - StalkPhish.py - INFO - Database: ./test/db/StalkPhish.sqlite3
@@ -133,6 +134,34 @@ $ ./StalkPhish.py -c conf/example.conf -G -N
 2019-06-18 20:57:04,709 - download.py - INFO - trying http://donnarogersimagery.com/wp-includes/pomo/login.alibaba.com.zip
 2019-06-18 20:57:12,643 - download.py - INFO - [DL ] Found archive, downloaded it as: ./test/dl/http__donnarogersimagery.com_wp-includes_pomo_login.alibaba.com.zip
 2019-06-18 20:57:12,677 - download.py - INFO - [Email] Found: shaddyokoh@hotmail.com
+[...]
+~~~
+
+## Search usage (Search without touching your configuration file search keyword)
+~~~
+$ ./StalkPhish.py -c conf/example.conf -s office365
+
+  _____ _        _ _    _____  _     _     _
+ / ____| |      | | |  |  __ \| |   (_)   | |    
+| (___ | |_ __ _| | | _| |__) | |__  _ ___| |__  
+ \___ \| __/ _` | | |/ /  ___/| '_ \| / __| '_ \ 
+ ____) | || (_| | |   <| |    | | | | \__ \ | | |
+|_____/ \__\__,_|_|_|\__\|    |_| |_|_|___/_| |_|
+
+-= StalkPhish - The Phishing Kit stalker - v0.9.7 =-
+
+2019-09-10 17:58:03,141 - StalkPhish.py - INFO - Configuration file to use: conf/example.conf
+2019-09-10 17:58:03,142 - StalkPhish.py - INFO - Database: ./db/StalkPhish.sqlite3
+2019-09-10 17:58:03,142 - StalkPhish.py - INFO - Main table: StalkPhish
+2019-09-10 17:58:03,210 - StalkPhish.py - INFO - Investigation table: StalkPhishInvestig
+2019-09-10 17:58:03,279 - StalkPhish.py - INFO - Files directory: ./files/
+2019-09-10 17:58:03,279 - StalkPhish.py - INFO - Download directory: ./dl/
+2019-09-10 17:58:03,280 - StalkPhish.py - INFO - Declared Proxy: socks5://127.0.0.1:9050
+
+2019-09-10 17:58:03,280 - StalkPhish.py - INFO - Proceeding to OSINT modules launch
+2019-09-10 17:58:04,640 - urlscan.py - INFO - Searching for 'office365'...
+2019-09-10 17:58:06,862 - urlscan.py - INFO - https://audio209-secondary.z11.web.core.windows.net/xoaksAOKmadjMAoakdamOjasmOADFjoam.xml/VM-memo-ref-29899uo.wav.html%3F audio209-secondary.z11.web.core.windows.net 52.239.146.65 https://urlscan.io/result/f3d6d738-83e5-486b-92d0-f7acd3fc992f Tue Sep 10 17:58:04 2019 404
+2019-09-10 17:58:09,427 - urlscan.py - INFO - https://gzbnmd.com/aut1/accounts/active/MTU2ODEyODk2NDJiYmRiNGExNWJjMWUxNDI5YjliYWIzZmJlMjFhMjQ0M2M0OGQ0N2I6a3NjaHViZXJ0QG10Lmdvdg%3D%3D gzbnmd.com 199.188.200.253 https://urlscan.io/result/f95e6302-5d13-4c45-b69e-12de6c5bc06e Tue Sep 10 17:58:06 2019 200
 [...]
 ~~~
 
