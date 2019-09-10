@@ -29,7 +29,7 @@ from tools.sqlite import SqliteCmd
 from tools.addurl import AddUniqueURL
 from tools.logging import Logger
 from tools.confparser import ConfParser
-VERSION = "0.9.6"
+VERSION = "0.9.7"
 
 
 # Graceful banner  :)
@@ -54,6 +54,7 @@ def usage():
     -G --get        Try to download zip file containing phishing kit sources (long and noisy)
     -N --nosint     Don't use OSINT databases
     -u --url        Add only one URL
+    -s --search     Search for a specific string on OSINT modules
     """
     print(usage)
     sys.exit(0)
@@ -66,16 +67,18 @@ def args_parse():
     global OSINTsources
     global UniqueURL
     global URLadd
+    global SearchUString
     confound = "NO"
     DLPhishingKit = "NO"
     OSINTsources = "YES"
     UniqueURL = "NO"
     URLadd = ""
+    SearchUString = ""
 
     if not len(sys.argv[1:]):
         usage()
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hNGc:u:", ["help", "nosint", "get", "conf=", "url="])
+        opts, args = getopt.getopt(sys.argv[1:], "hNGc:u:s:", ["help", "nosint", "get", "conf=", "url=", "search="])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -102,14 +105,26 @@ def args_parse():
         elif o in ("-u", "--url"):
             UniqueURL = "YES"
             URLadd = a
+        elif o in ("-s", "--search"):
+            SearchUString = a
         else:
             assert False, "Unhandled Option"
     return
 
 
 # Modules initialization
-def LaunchModules():
+def LaunchModules(SearchString):
     LOG.info("Proceeding to OSINT modules launch")
+    try:
+        # If more than one search word
+        if ',' in SearchString:
+            SearchString_list = [SearchString.strip(' ') for SearchString in SearchString.split(',')]
+        else:
+            SearchString_list = [SearchString]
+    except:
+        err = sys.exc_info()
+        LOG.error("SearchString error " + str(err))
+
     ###################
     # URLScan module #
     ###################
@@ -117,17 +132,6 @@ def LaunchModules():
     if ModuleUrlscan is True:
         from modules.urlscan import UrlscanOSINT, UrlscanExtractor
         ConfURLSCAN_url = CONF.URLSCAN_url
-        SearchString = CONF.SearchString
-
-        try:
-            # If more than one search word
-            if ',' in SearchString:
-                SearchString_list = [SearchString.strip(' ') for SearchString in SearchString.split(',')]
-            else:
-                SearchString_list = [SearchString]
-        except:
-            err = sys.exc_info()
-            LOG.error("SearchString error " + str(err))
 
         for SearchString in SearchString_list:
             UrlscanOSINT(ConfURLSCAN_url, PROXY, SearchString, LOG)
@@ -142,17 +146,6 @@ def LaunchModules():
     if ModuleUrlquery is True:
         from modules.urlquery import UrlqueryOSINT, UrlqueryExtractor
         ConfURLQUERY_url = CONF.URLQUERY_url
-        SearchString = CONF.SearchString
-
-        try:
-            # If more than one search word
-            if ',' in SearchString:
-                SearchString_list = [SearchString.strip(' ') for SearchString in SearchString.split(',')]
-            else:
-                SearchString_list = [SearchString]
-        except:
-            err = sys.exc_info()
-            LOG.error("SearchString error " + str(err))
 
         for SearchString in SearchString_list:
             UrlqueryOSINT(ConfURLQUERY_url, PROXY, SearchString, LOG)
@@ -169,7 +162,6 @@ def LaunchModules():
         ConfPHISHTANK_url = CONF.PHISHTANK_url
         ConfPHISHTANK_keep = CONF.PHISHTANK_keep
         ConfPHISHTANK_apikey = CONF.PHISHTANK_apikey
-        SearchString = CONF.SearchString
 
         try:
             if ConfPHISHTANK_apikey is not None:
@@ -195,12 +187,6 @@ def LaunchModules():
             else:
                 phishtank_file = SrcDir + "phishtank-feed-" + time.strftime("%Y%m%d-%H%M") + ".json"
                 PhishtankOSINT(phishtank_file, ConfPHISHTANK_url, ConfPHISHTANK_keep, SrcDir, PROXY, LOG)
-
-            # If more than one search word
-            if ',' in SearchString:
-                SearchString_list = [SearchString.strip(' ') for SearchString in SearchString.split(',')]
-            else:
-                SearchString_list = [SearchString]
 
             for SearchString in SearchString_list:
                 # Search into file
@@ -230,7 +216,6 @@ def LaunchModules():
         from modules.openphish import OpenphishOSINT, OpenphishExtractor, DeleteOpenphishFile
         ConfOPENPHISH_url = CONF.OPENPHISH_url
         ConfOPENPHISH_keep = CONF.OPENPHISH_keep
-        SearchString = CONF.SearchString
 
         try:
             # Get OPENPHISH free feed (if older than 1 hour)
@@ -248,13 +233,6 @@ def LaunchModules():
             else:
                 openphish_file = SrcDir + "openphish-feed-" + time.strftime("%Y%m%d-%H%M") + ".txt"
                 OpenphishOSINT(openphish_file, ConfOPENPHISH_url, ConfOPENPHISH_keep, SrcDir, PROXY, LOG)
-
-            # Search into file
-            # If more than one search word
-            if ',' in SearchString:
-                SearchString_list = [SearchString.strip(' ') for SearchString in SearchString.split(',')]
-            else:
-                SearchString_list = [SearchString]
 
             for SearchString in SearchString_list:
                 # Search into file
@@ -345,7 +323,10 @@ def ConfAnalysis(ConfFile):
         UAFILE = CONF.UAfile
 
         # Search stuff
-        SearchString = CONF.SearchString
+        if SearchUString:
+            SearchString = SearchUString
+        else:
+            SearchString = CONF.SearchString
 
         # Logging stuff
         LogConf = CONF.LogConf
@@ -405,7 +386,7 @@ def main():
 
         # Modules launch
         if OSINTsources is "YES":
-            LaunchModules()
+            LaunchModules(SearchString)
         else:
             pass
 
