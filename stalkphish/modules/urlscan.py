@@ -33,8 +33,8 @@ def SiteURLSQL(item, LOG, SQL, TABLEname, PROXY, UAFILE, UAG):
                 pass
         # can't resolv
         except:
-            IPaddress = None
-            ASN = None
+            IPaddress = ""
+            ASN = ""
 
         # HTTP connection
         try:
@@ -42,11 +42,11 @@ def SiteURLSQL(item, LOG, SQL, TABLEname, PROXY, UAFILE, UAG):
             UA = UAG.ChooseUA(UAFILE)
             user_agent = {'User-agent': UA}
             try:
-                r = requests.get(siteURL, headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12))
+                r = requests.get(siteURL, headers=user_agent, proxies=proxies, allow_redirects=True)
                 lastHTTPcode = str(r.status_code)
             except ValueError:
                 # No user-agent configured
-                r = requests.get(siteURL, proxies=proxies, allow_redirects=True, timeout=(5, 12))
+                r = requests.get(siteURL, proxies=proxies, allow_redirects=True)
                 lastHTTPcode = str(r.status_code)
             except requests.exceptions.Timeout:
                 lastHTTPcode = "timeout"
@@ -74,7 +74,7 @@ def UrlscanOSINT(ConfURLSCAN_url, PROXY, SearchString, LOG):
     try:
         proxies = {'http': PROXY, 'https': PROXY}
         payload = {'q': SearchString}
-        r = requests.get(url=ConfURLSCAN_url + "?q=" + SearchString, proxies=proxies, allow_redirects=True, timeout=(5, 12))
+        r = requests.get(url=ConfURLSCAN_url + "?q=" + SearchString, proxies=proxies, allow_redirects=True, timeout=(10, 20))
         HTMLText = r.json()
         LOG.info("Searching for \'" + SearchString + "\'...")
 
@@ -86,10 +86,10 @@ def UrlscanOSINT(ConfURLSCAN_url, PROXY, SearchString, LOG):
         pass
 
 
-# Parse urlQuery HTML page
+# Parse Urlscan HTML page
 def UrlscanExtractor(LOG, SQL, TABLEname, PROXY, UAFILE):
     UAG = UAgent()
-    # Search in Urlquery HTML file
+    # Search in Urlscan HTML file
     try:
         for item in HTMLText['results']:
             SiteURLSQL(item, LOG, SQL, TABLEname, PROXY, UAFILE, UAG)

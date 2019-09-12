@@ -34,8 +34,8 @@ def SiteURLSQL(openphish_file, entry, LOG, SQL, TABLEname, PROXY, UAFILE, UAG):
                 pass
         # can't resolv
         except:
-            IPaddress = None
-            ASN = None
+            IPaddress = ""
+            ASN = ""
 
         # HTTP connection
         try:
@@ -83,7 +83,7 @@ def OpenphishOSINT(openphish_file, ConfOPENPHISH_url, ConfOPENPHISH_keep, SrcDir
     # Get Openphish OSINT TXT file
     proxies = {'http': PROXY, 'https': PROXY}
     LOG.info("Retrieving OpenPhish\'s file (" + ConfOPENPHISH_url + ") ... Could take several minutes...")
-    resp = requests.get(url=ConfOPENPHISH_url, proxies=proxies, allow_redirects=True)
+    resp = requests.get(url=ConfOPENPHISH_url, proxies=proxies, allow_redirects=True, timeout=(10, 20))
     with open(openphish_file, "wb") as file:
         file.write(resp.content)
         LOG.info("OpenPhish\'s file retrieved and save as " + openphish_file)

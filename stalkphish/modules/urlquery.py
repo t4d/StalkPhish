@@ -38,8 +38,8 @@ def SiteURLSQL(SearchString, line, LOG, SQL, TABLEname, PROXY, UAFILE, UAG):
                 pass
         # can't resolv
         except:
-            IPaddress = None
-            ASN = None
+            IPaddress = ""
+            ASN = ""
 
         # HTTP connection
         try:
@@ -47,7 +47,7 @@ def SiteURLSQL(SearchString, line, LOG, SQL, TABLEname, PROXY, UAFILE, UAG):
             UA = UAG.ChooseUA(UAFILE)
             user_agent = {'User-agent': UA}
             try:
-                r = requests.get(siteURL, headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12))
+                r = requests.get(siteURL, headers=user_agent, proxies=proxies, allow_redirects=True)
                 # Follow redirect and add new URI to database
                 if (len(r.history) > 1) and ("301" in str(r.history[-1])) and (siteURL != r.url) and (siteURL.split('/')[:-1] != r.url.split('/')[:-2]) and (siteURL + '/' != r.url):
                     lastHTTPcode = str(r.status_code)
@@ -57,7 +57,7 @@ def SiteURLSQL(SearchString, line, LOG, SQL, TABLEname, PROXY, UAFILE, UAG):
                 lastHTTPcode = str(r.status_code)
             except ValueError:
                 # No user-agent configured
-                r = requests.get(siteURL, proxies=proxies, allow_redirects=True, timeout=(5, 12))
+                r = requests.get(siteURL, proxies=proxies, allow_redirects=True)
                 lastHTTPcode = str(r.status_code)
             except requests.exceptions.Timeout:
                 lastHTTPcode = "timeout"
@@ -87,7 +87,7 @@ def UrlqueryOSINT(ConfURLQUERY_url, PROXY, SearchString, LOG):
     try:
         proxies = {'http': PROXY, 'https': PROXY}
         payload = {'q': SearchString}
-        r = requests.get(ConfURLQUERY_url, params=payload, proxies=proxies)
+        r = requests.get(ConfURLQUERY_url, params=payload, allow_redirects=True, timeout=(10, 20))
         HTMLText = r.text
         LOG.info("Searching for \'" + SearchString + "\'...")
     except Exception as e:
