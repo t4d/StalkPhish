@@ -9,6 +9,7 @@ import sys
 import json
 import socket
 import requests
+import cfscrape
 from os.path import dirname
 from urllib.parse import urlparse, quote
 from tools.utils import TimestampNow
@@ -38,8 +39,8 @@ def SiteURLSQL(phishtank_file, entry, LOG, SQL, TABLEname, PROXY, UAFILE, UAG):
                 pass
         # can't resolv
         except:
-            IPaddress = None
-            ASN = None
+            IPaddress = ""
+            ASN = ""
 
         # HTTP connection
         try:
@@ -88,7 +89,10 @@ def PhishtankOSINT(phishtank_file, ConfPHISHTANK_url, ConfPHISHTANK_keep, SrcDir
     # Get phishtank OSINT JSON file
     proxies = {'http': PROXY, 'https': PROXY}
     LOG.info("Retrieving Phishtank's JSON file... Could take several minutes...")
-    resp = requests.get(url=ConfPHISHTANK_url, proxies=proxies, allow_redirects=True)
+    # resp = requests.get(url=ConfPHISHTANK_url, proxies=proxies, allow_redirects=True)
+    # Using CloudFlare Scraper
+    scraper = cfscrape.create_scraper()
+    resp = scraper.get(ConfPHISHTANK_url, proxies=proxies, allow_redirects=True, timeout=(10, 20))
 
     # download PhishTank JSON file
     if str(resp.status_code) == "403":
