@@ -20,10 +20,12 @@
 * [urlquery.net](https://urlquery.net/search) search web crawler
 * [Phishtank](https://www.phishtank.com/developer_info.php) free OSINT feed (with or without API key)
 * [Openphish](https://openphish.com/phishing_feeds.html) free OSINT feed
+* [PhishStats](https://phishstats.info/) search API
 
 ## Requirements
 * Python 3
 * BeautifulSoup4
+* cfscrape
 * requests
 * PySocks
 * lxml

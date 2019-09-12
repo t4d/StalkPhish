@@ -62,6 +62,10 @@ class ConfParser:
                 self.OPENPHISH_url = self.config['OPENPHISH']['OSINT_url']
                 self.OPENPHISH_keep = self.config['OPENPHISH'].getboolean('keep_files')
 
+                self.PHISHSTATS_active = self.config['PHISHSTATS'].getboolean('activate')
+                self.PHISHSTATS_url = self.config['PHISHSTATS']['OSINT_url']
+                self.PHISHSTATS_keep = self.config['PHISHSTATS'].getboolean('keep_files')
+
         except IOError:
             print("[!!!] Configuration file Error: " + Confile)
         except:
