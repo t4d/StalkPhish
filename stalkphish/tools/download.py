@@ -98,13 +98,13 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
     now = str(TimestampNow().Timestamp())
     SHA = SHA256()
 
-    PsiteURL = None
-    ResiteURL = siteURL
-    PsiteURL = urlparse(ResiteURL)
-    if len(PsiteURL.path.split("/")[1:]) >= 2:
-        siteURL = ResiteURL.rsplit('/', 1)[0]
-    else:
-        siteURL = ResiteURL
+    # PsiteURL = None
+    # ResiteURL = siteURL
+    # PsiteURL = urlparse(ResiteURL)
+    # if len(PsiteURL.path.split("/")[1:]) >= 2:
+    #     siteURL = ResiteURL.rsplit('/', 1)[0]
+    # else:
+    #     siteURL = ResiteURL
 
     # Let's try to find a phishing kit source archive
     try:
