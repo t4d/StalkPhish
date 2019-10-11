@@ -11,6 +11,7 @@ import io
 import zipfile
 import sys
 import hashlib
+import cfscrape
 from urllib.parse import urlparse
 from tools.utils import TimestampNow
 from tools.utils import SHA256
@@ -87,7 +88,7 @@ def PKDownloadOpenDir(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, D
             LOG.error("[DL ] content-type error")
 
 
-# Connexion tests, Phishing kits downloadingd
+# Connexion tests, Phishing kits downloading
 def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE, ASN):
     global ziplist
     global PageTitle
@@ -97,14 +98,6 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
     user_agent = {'User-agent': UA}
     now = str(TimestampNow().Timestamp())
     SHA = SHA256()
-
-    # PsiteURL = None
-    # ResiteURL = siteURL
-    # PsiteURL = urlparse(ResiteURL)
-    # if len(PsiteURL.path.split("/")[1:]) >= 2:
-    #     siteURL = ResiteURL.rsplit('/', 1)[0]
-    # else:
-    #     siteURL = ResiteURL
 
     # Let's try to find a phishing kit source archive
     try:
@@ -130,7 +123,6 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
         except Exception as e:
             print(e)
 
-        # if (str(r.status_code) != "404"):
         LOG.info("[" + str(r.status_code) + "] " + r.url)
         SQL.SQLiteInsertStillTryDownload(TABLEname, siteURL)
         if SQL.SQLiteInvestigVerifyEntry(InvTABLEname, siteDomain, IPaddress) is 0:
@@ -186,7 +178,12 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
                     if (' = ' or '%' or '?' or '-' or '@') not in os.path.basename(os.path.normpath(zip)):
                         try:
                             LOG.info("trying " + zip + ".zip")
-                            rz = requests.get(zip + ".zip", headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
+                            # Try to use cfscraper if Cloudflare's check
+                            if "Cloudflare" in PageTitle:
+                                scraper = cfscrape.create_scraper()
+                                rz = scraper.get(zip + ".zip", headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
+                            else:
+                                rz = requests.get(zip + ".zip", headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
                             # if str(rz.status_code) != "404":
                             lastHTTPcode = str(rz.status_code)
                             # Reduce filename lenght
