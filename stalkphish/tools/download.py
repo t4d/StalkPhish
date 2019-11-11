@@ -11,6 +11,7 @@ import io
 import zipfile
 import sys
 import hashlib
+import cfscrape
 from urllib.parse import urlparse
 from tools.utils import TimestampNow
 from tools.utils import SHA256
@@ -190,48 +191,53 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
                             # if URL is not rootpath siteURL
                             if int(len(zip.split("/")[3:][0])) > 0:
                                 LOG.info("trying " + zip + ".zip")
-                                rz = requests.get(zip + ".zip", headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
-                                # if str(rz.status_code) != "404":
-                                lastHTTPcode = str(rz.status_code)
-                                # Reduce filename lenght
-                                if len(zip) > 250:
-                                    zzip = zip.replace('/', '_').replace(':', '')[:250]
+                                # Try to use cfscraper if Cloudflare's check
+                                if "Cloudflare" in PageTitle:
+                                    scraper = cfscrape.create_scraper()
+                                    rz = scraper.get(zip + ".zip", headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
                                 else:
-                                    zzip = zip.replace('/', '_').replace(':', '')
-                                try:
-                                    if zipfile.is_zipfile(io.BytesIO(rz.content)):
-                                        savefile = DLDir + zzip + '.zip'
-                                        # Still collected file
-                                        if os.path.exists(savefile):
-                                            LOG.info("[DL ] Found still collected archive: " + savefile)
-                                            return
-                                        # New file to download
-                                        else:
-                                            LOG.info("[DL ] Found archive, downloaded it as: " + savefile)
-                                            with open(savefile, "wb") as code:
-                                                code.write(rz.content)
-                                                pass
-                                            ZipFileName = str(zzip + '.zip')
-                                            ZipFileHash = SHA.hashFile(savefile)
-                                            SQL.SQLiteInvestigUpdatePK(InvTABLEname, siteURL, ZipFileName, ZipFileHash, now, lastHTTPcode)
-                                            # Extract e-mails from downloaded file
-                                            try:
-                                                ZS = ZipSearch()
-                                                extracted_emails = str(ZS.PKzipSearch(InvTABLEname, SQL, LOG, DLDir, savefile)).strip("[]").replace("'", "")
-                                                LOG.info("[Email] Found: {}".format(extracted_emails))
-                                                SQL.SQLiteInvestigInsertEmail(InvTABLEname, extracted_emails, ZipFileName)
-                                            except Exception as e:
-                                                LOG.info("Extracted emails exception: {}".format(e))
-                                            return
+                                    rz = requests.get(zip + ".zip", headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
+                                    # if str(rz.status_code) != "404":
+                                    lastHTTPcode = str(rz.status_code)
+                                    # Reduce filename lenght
+                                    if len(zip) > 250:
+                                        zzip = zip.replace('/', '_').replace(':', '')[:250]
                                     else:
+                                        zzip = zip.replace('/', '_').replace(':', '')
+                                    try:
+                                        if zipfile.is_zipfile(io.BytesIO(rz.content)):
+                                            savefile = DLDir + zzip + '.zip'
+                                            # Still collected file
+                                            if os.path.exists(savefile):
+                                                LOG.info("[DL ] Found still collected archive: " + savefile)
+                                                return
+                                            # New file to download
+                                            else:
+                                                LOG.info("[DL ] Found archive, downloaded it as: " + savefile)
+                                                with open(savefile, "wb") as code:
+                                                    code.write(rz.content)
+                                                    pass
+                                                ZipFileName = str(zzip + '.zip')
+                                                ZipFileHash = SHA.hashFile(savefile)
+                                                SQL.SQLiteInvestigUpdatePK(InvTABLEname, siteURL, ZipFileName, ZipFileHash, now, lastHTTPcode)
+                                                # Extract e-mails from downloaded file
+                                                try:
+                                                    ZS = ZipSearch()
+                                                    extracted_emails = str(ZS.PKzipSearch(InvTABLEname, SQL, LOG, DLDir, savefile)).strip("[]").replace("'", "")
+                                                    LOG.info("[Email] Found: {}".format(extracted_emails))
+                                                    SQL.SQLiteInvestigInsertEmail(InvTABLEname, extracted_emails, ZipFileName)
+                                                except Exception as e:
+                                                    LOG.info("Extracted emails exception: {}".format(e))
+                                                return
+                                        else:
+                                            pass
+                                    except requests.exceptions.ContentDecodingError:
+                                        LOG.error("[DL ] content-type error")
+                                    except:
                                         pass
-                                except requests.exceptions.ContentDecodingError:
-                                    LOG.error("[DL ] content-type error")
-                                except:
-                                    pass
-                                # # 404
-                                # else:
-                                #     pass
+                                    # # 404
+                                    # else:
+                                    #     pass
                             # rootpath of siteURL
                             else:
                                 rr = requests.get(zip, headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
