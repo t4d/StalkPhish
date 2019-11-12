@@ -11,6 +11,7 @@ import io
 import zipfile
 import sys
 import hashlib
+import cfscrape
 from urllib.parse import urlparse
 from tools.utils import TimestampNow
 from tools.utils import SHA256
@@ -98,13 +99,13 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
     now = str(TimestampNow().Timestamp())
     SHA = SHA256()
 
-    PsiteURL = None
-    ResiteURL = siteURL
-    PsiteURL = urlparse(ResiteURL)
-    if len(PsiteURL.path.split("/")[1:]) >= 2:
-        siteURL = ResiteURL.rsplit('/', 1)[0]
-    else:
-        siteURL = ResiteURL
+    # PsiteURL = None
+    # ResiteURL = siteURL
+    # PsiteURL = urlparse(ResiteURL)
+    # if len(PsiteURL.path.split("/")[1:]) >= 2:
+    #     siteURL = ResiteURL.rsplit('/', 1)[0]
+    # else:
+    #     siteURL = ResiteURL
 
     # Let's try to find a phishing kit source archive
     try:
@@ -130,64 +131,73 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
         except Exception as e:
             print(e)
 
-        if (str(r.status_code) != "404"):
-            LOG.info("[" + str(r.status_code) + "] " + r.url)
-            SQL.SQLiteInsertStillTryDownload(TABLEname, siteURL)
-            if SQL.SQLiteInvestigVerifyEntry(InvTABLEname, siteDomain, IPaddress) is 0:
-                SQL.SQLiteInvestigInsert(InvTABLEname, siteURL, siteDomain, IPaddress, now, str(r.status_code))
+        # if (str(r.status_code) != "404"):
+        LOG.info("[" + str(r.status_code) + "] " + r.url)
+        SQL.SQLiteInsertStillTryDownload(TABLEname, siteURL)
+        if SQL.SQLiteInvestigVerifyEntry(InvTABLEname, siteDomain, IPaddress) is 0:
+            SQL.SQLiteInvestigInsert(InvTABLEname, siteURL, siteDomain, IPaddress, now, str(r.status_code))
+        else:
+            pass
+        ziplist = []
+        path = siteURL
+        pathl = '/' .join(path.split("/")[:3])
+        pathlist = path.split("/")[3:]
+
+        # Make list
+        current = 0
+        newpath = ""
+        while current < len(pathlist):
+            if current == 0:
+                newpath = pathlist[current]
             else:
-                pass
-            ziplist = []
-            path = siteURL
-            pathl = '/' .join(path.split("/")[:3])
-            pathlist = path.split("/")[3:]
+                newpath = newpath + "/" + pathlist[current]
+            current = current + 1
+            pathD = pathl + "/" + newpath
+            ziplist.append(pathD)
+            rootpath = pathl + "/"
+            ziplist.append(rootpath)
 
-            # Make list
-            current = 0
-            newpath = ""
-            while current < len(pathlist):
-                if current == 0:
-                    newpath = pathlist[current]
+        # Get page title
+        try:
+            if len(ziplist) >= 1:
+                rhtml = requests.get(siteURL, headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
+                thtml = BeautifulSoup(rhtml.text, 'html.parser')
+                try:
+                    PageTitle = thtml.title.text.strip()
+                except:
+                    PageTitle = None
+                if PageTitle is not None:
+                    PageTitle = re.sub('\s+', ' ', PageTitle)
+                    LOG.info(PageTitle)
+                    SQL.SQLiteInvestigUpdateTitle(InvTABLEname, siteURL, PageTitle)
                 else:
-                    newpath = newpath + "/" + pathlist[current]
-                current = current + 1
-                pathD = pathl + "/" + newpath
-                ziplist.append(pathD)
+                    pass
+        except AttributeError:
+            pass
+        except requests.exceptions.ReadTimeout:
+            pass
+        except requests.exceptions.ConnectTimeout:
+            pass
+        except:
+            err = sys.exc_info()
+            LOG.error("Get PageTitle Error: " + siteURL + str(err))
 
-            # Get page title
-            try:
-                if len(ziplist) >= 1:
-                    rhtml = requests.get(siteURL, headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
-                    thtml = BeautifulSoup(rhtml.text, 'html.parser')
-                    try:
-                        PageTitle = thtml.title.text.strip()
-                    except:
-                        PageTitle = None
-                    if PageTitle is not None:
-                        PageTitle = re.sub('\s+', ' ', PageTitle)
-                        LOG.info(PageTitle)
-                        SQL.SQLiteInvestigUpdateTitle(InvTABLEname, siteURL, PageTitle)
-                    else:
-                        pass
-            except AttributeError:
-                pass
-            except requests.exceptions.ReadTimeout:
-                pass
-            except requests.exceptions.ConnectTimeout:
-                pass
-            except:
-                err = sys.exc_info()
-                LOG.error("Get PageTitle Error: " + siteURL + str(err))
-
-            try:
-                # Try to find and download phishing kit archive (.zip)
-                if len(ziplist) > 1:
-                    for zip in ziplist:
-                        if (' = ' or '%' or '?' or '-' or '@') not in os.path.basename(os.path.normpath(zip)):
-                            try:
+        try:
+            # Try to find and download phishing kit archive (.zip)
+            if len(ziplist) >= 1:
+                for zip in ziplist:
+                    if (' = ' or '%' or '?' or '-' or '@') not in os.path.basename(os.path.normpath(zip)):
+                        try:
+                            # if URL is not rootpath siteURL
+                            if int(len(zip.split("/")[3:][0])) > 0:
                                 LOG.info("trying " + zip + ".zip")
-                                rz = requests.get(zip + ".zip", headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
-                                if str(rz.status_code) != "404":
+                                # Try to use cfscraper if Cloudflare's check
+                                if "Cloudflare" in PageTitle:
+                                    scraper = cfscrape.create_scraper()
+                                    rz = scraper.get(zip + ".zip", headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
+                                else:
+                                    rz = requests.get(zip + ".zip", headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
+                                    # if str(rz.status_code) != "404":
                                     lastHTTPcode = str(rz.status_code)
                                     # Reduce filename lenght
                                     if len(zip) > 250:
@@ -225,44 +235,60 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
                                         LOG.error("[DL ] content-type error")
                                     except:
                                         pass
-                                # 404
-                                else:
-                                    pass
-                            except requests.exceptions.ReadTimeout:
-                                LOG.debug("Connection Timeout: " + siteURL)
-                            except requests.exceptions.ConnectTimeout:
-                                LOG.debug("Connection Timeout")
-                            except Exception as e:
-                                LOG.error("Error Downloading zip: {}".format(e))
-                                pass
-
-                            # Search for OpenDir
-                            try:
+                                    # # 404
+                                    # else:
+                                    #     pass
+                            # rootpath of siteURL
+                            else:
+                                rr = requests.get(zip, headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
+                                thtml = BeautifulSoup(rr.text, 'html.parser')
+                                try:
+                                    PageTitle = thtml.title.text.strip()
+                                except:
+                                    PageTitle = None
                                 if PageTitle is not None:
-                                    if 'Index of' in PageTitle:
-                                        PKDownloadOpenDir(zip, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE, ASN)
-                                    else:
-                                        pass
+                                    PageTitle = re.sub('\s+', ' ', PageTitle)
                                 else:
                                     pass
-                            except Exception as e:
-                                LOG.error("Potential OpenDir connection error: " + str(e))
+
+                        except requests.exceptions.ReadTimeout:
+                            LOG.debug("Connection Timeout: " + siteURL)
+                        except requests.exceptions.ConnectTimeout:
+                            LOG.debug("Connection Timeout")
+                        except Exception as e:
+                            LOG.error("Error Downloading zip: {}".format(e))
+                            pass
+
+                        # Search for OpenDir
+                        try:
+                            if PageTitle is not None:
+                                if 'Index of' in PageTitle:
+                                    PKDownloadOpenDir(zip, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE, ASN)
+                                # 000webhostapp 'opendir' like
+                                elif '.000webhostapp.com Free Website' in PageTitle:
+                                    PKDownloadOpenDir(zip, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE, ASN)
+                                else:
+                                    pass
+                            else:
                                 pass
-                        else:
+                        except Exception as e:
+                            LOG.error("Potential OpenDir connection error: " + str(e))
                             pass
                     else:
                         pass
-                # Ziplist empty
                 else:
                     pass
-            except Exception as e:
-                LOG.error("DL Error: " + str(e))
+            # Ziplist empty
+            else:
+                pass
+        except Exception as e:
+            LOG.error("DL Error: " + str(e))
 
-        else:
-            LOG.debug("[" + str(r.status_code) + "] " + r.url)
-            lastHTTPcode = str(r.status_code)
-            SQL.SQLiteInvestigUpdateCode(InvTABLEname, siteURL, now, lastHTTPcode)
-            SQL.SQLiteInsertStillTryDownload(TABLEname, siteURL)
+        # else:
+        #     LOG.debug("[" + str(r.status_code) + "] " + r.url)
+        #     lastHTTPcode = str(r.status_code)
+        #     SQL.SQLiteInvestigUpdateCode(InvTABLEname, siteURL, now, lastHTTPcode)
+        #     SQL.SQLiteInsertStillTryDownload(TABLEname, siteURL)
 
     except requests.exceptions.ConnectionError:
         err = sys.exc_info()
