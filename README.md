@@ -21,6 +21,7 @@
 * [Phishtank](https://www.phishtank.com/developer_info.php) free OSINT feed (with or without API key)
 * [Openphish](https://openphish.com/phishing_feeds.html) free OSINT feed
 * [PhishStats](https://phishstats.info/) search API
+* [Phishing.Database](https://github.com/mitchellkrogza/Phishing.Database) free OSINT feed
 
 ## Requirements
 * Python 3
@@ -63,7 +64,7 @@ $ ./StalkPhish.py -h
  ____) | || (_| | |   <| |    | | | | \__ \ | | |
 |_____/ \__\__,_|_|_|\__\|    |_| |_|_|___/_| |_|
 
--= StalkPhish - The Phishing Kit stalker - v0.9.7 =-
+-= StalkPhish - The Phishing Kit stalker - v0.9.8-2 =-
 
 
     -h --help       Prints this help
@@ -86,7 +87,7 @@ $ ./StalkPhish.py -c conf/example.conf
  ____) | || (_| | |   <| |    | | | | \__ \ | | |
 |_____/ \__\__,_|_|_|\__\|    |_| |_|_|___/_| |_|
 
--= StalkPhish - The Phishing Kit stalker - v0.9.7 =-
+-= StalkPhish - The Phishing Kit stalker - v0.9.8-2 =-
 
 2019-06-18 21:01:16,234 - StalkPhish.py - INFO - Configuration file to use: conf/example.conf
 2019-06-18 21:01:16,234 - StalkPhish.py - INFO - Database: ./test/db/StalkPhish.sqlite3
@@ -118,7 +119,7 @@ $ ./StalkPhish.py -c conf/example.conf -G -N
  ____) | || (_| | |   <| |    | | | | \__ \ | | |
 |_____/ \__\__,_|_|_|\__\|    |_| |_|_|___/_| |_|
 
--= StalkPhish - The Phishing Kit stalker - v0.9.7 =-
+-= StalkPhish - The Phishing Kit stalker - v0.9.8-2 =-
 
 2019-06-18 20:56:52,818 - StalkPhish.py - INFO - Configuration file to use: conf/example.conf
 2019-06-18 20:56:52,818 - StalkPhish.py - INFO - Database: ./test/db/StalkPhish.sqlite3
@@ -150,7 +151,7 @@ $ ./StalkPhish.py -c conf/example.conf -s office365
  ____) | || (_| | |   <| |    | | | | \__ \ | | |
 |_____/ \__\__,_|_|_|\__\|    |_| |_|_|___/_| |_|
 
--= StalkPhish - The Phishing Kit stalker - v0.9.7 =-
+-= StalkPhish - The Phishing Kit stalker - v0.9.8-2 =-
 
 2019-09-10 17:58:03,141 - StalkPhish.py - INFO - Configuration file to use: conf/example.conf
 2019-09-10 17:58:03,142 - StalkPhish.py - INFO - Database: ./db/StalkPhish.sqlite3

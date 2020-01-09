@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #   StalkPhish - The Phishing kits stalker
-#   Copyright (C) 2018-2019 Thomas Damonneville
+#   Copyright (C) 2018-2020 Thomas "tAd" Damonneville
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU Affero General Public License as
@@ -29,7 +29,7 @@ from tools.sqlite import SqliteCmd
 from tools.addurl import AddUniqueURL
 from tools.logging import Logger
 from tools.confparser import ConfParser
-VERSION = "0.9.8"
+VERSION = "0.9.8-2"
 
 
 # Graceful banner  :)
@@ -260,45 +260,84 @@ def LaunchModules(SearchString):
         ConfPHISHSTATS_url = CONF.PHISHSTATS_url
         ConfPHISHSTATS_keep = CONF.PHISHSTATS_keep
 
-    try:
-        # Get PHISHSTATS free feed (if older than 2 hour)
-        phishstats_file = ""
-        filelist = glob.glob(SrcDir + "phishstats-feed-*.json")
-        if filelist:
-            last_phishstats_file = max(filelist, key=os.path.getctime)
-            if os.stat(last_phishstats_file).st_mtime < time.time() - 7200:
-                # file older than 2 hours, download a new one
+        try:
+            # Get PHISHSTATS free feed (if older than 2 hour)
+            phishstats_file = ""
+            filelist = glob.glob(SrcDir + "phishstats-feed-*.json")
+            if filelist:
+                last_phishstats_file = max(filelist, key=os.path.getctime)
+                if os.stat(last_phishstats_file).st_mtime < time.time() - 7200:
+                    # file older than 2 hours, download a new one
+                    phishstats_file = SrcDir + "phishstats-feed-" + time.strftime("%Y%m%d-%H%M") + ".json"
+                    PhishstatsOSINT(phishstats_file, ConfPHISHSTATS_url, ConfPHISHSTATS_keep, PROXY, SearchString, LOG)
+                else:
+                    LOG.info("Phishstats\'s file still exist (<2h). Proceeding to extraction...")
+                    phishstats_file = last_phishstats_file
+            else:
                 phishstats_file = SrcDir + "phishstats-feed-" + time.strftime("%Y%m%d-%H%M") + ".json"
                 PhishstatsOSINT(phishstats_file, ConfPHISHSTATS_url, ConfPHISHSTATS_keep, PROXY, SearchString, LOG)
+
+            for SearchString in SearchString_list:
+                # Search into file
+                LOG.info("Searching for \'" + SearchString + "\'...")
+                PhishstatsExtractor(phishstats_file, SearchString, LOG, SQL, TABLEname, PROXY, UAFILE)
+
+            # Proceed to file delete if don't want to keep it
+            if ConfPHISHSTATS_keep is not True:
+                DeletePhishstatsFile(phishstats_file, LOG)
             else:
-                LOG.info("Phishstats\'s file still exist (<2h). Proceeding to extraction...")
-                phishstats_file = last_phishstats_file
-        else:
-            phishstats_file = SrcDir + "phishstats-feed-" + time.strftime("%Y%m%d-%H%M") + ".json"
-            PhishstatsOSINT(phishstats_file, ConfPHISHSTATS_url, ConfPHISHSTATS_keep, PROXY, SearchString, LOG)
-
-        for SearchString in SearchString_list:
-            # Search into file
-            LOG.info("Searching for \'" + SearchString + "\'...")
-            PhishstatsExtractor(phishstats_file, SearchString, LOG, SQL, TABLEname, PROXY, UAFILE)
-
-        # Proceed to file delete if don't want to keep it
-        if ConfPHISHSTATS_keep is not True:
-            DeletePhishstatsFile(phishstats_file, LOG)
-        else:
+                pass
+        # if sys.exit() from Phishtank module
+        except SystemExit:
             pass
-    # if sys.exit() from Phishtank module
-    except SystemExit:
-        pass
-    except:
-        err = sys.exc_info()
-        LOG.error("Phishstats module error: " + str(err))
-        # for SearchString in SearchString_list:
-        #     PhishstatsOSINT(ConfPHISHSTATS_url, PROXY, SearchString, LOG)
-        #     PhishstatsExtractor(LOG, SQL, TABLEname, PROXY, UAFILE)
+        except:
+            err = sys.exc_info()
+            LOG.error("Phishstats module error: " + str(err))
     else:
         pass
 
+        ############################
+        # Phishing.Database module #
+        ############################
+        ModulePhishingDB = CONF.PHISHINGDB_active
+        if ModulePhishingDB is True:
+            from modules.phishingdb import PhishingDBOSINT, PhishingDBExtractor, DeletePhishingDBFile
+            ConfPHISHINGDB_url = CONF.PHISHINGDB_url
+            ConfPHISHINGDB_keep = CONF.PHISHINGDB_keep
+
+            try:
+                # Get Phishing.Database free feed (if older than 1 hour)
+                phishingdb_file = ""
+                filelist = glob.glob(SrcDir + "phishingdb-feed-*.txt")
+                if filelist:
+                    last_phishingdb_file = max(filelist, key=os.path.getctime)
+                    if os.stat(last_phishingdb_file).st_mtime < time.time() - 7200:
+                        # file older than 2 hours, download a new one
+                        phishingdb_file = SrcDir + "phishingdb-feed-" + time.strftime("%Y%m%d-%H%M") + ".txt"
+                        PhishingDBOSINT(phishingdb_file, ConfPHISHINGDB_url, ConfPHISHINGDB_keep, SrcDir, PROXY, LOG)
+                    else:
+                        LOG.info("Phishing.Database\'s file still exist (<2h). Proceeding to extraction...")
+                        phishingdb_file = last_phishingdb_file
+                else:
+                    phishingdb_file = SrcDir + "phishingdb-feed-" + time.strftime("%Y%m%d-%H%M") + ".txt"
+                    PhishingDBOSINT(phishingdb_file, ConfPHISHINGDB_url, ConfPHISHINGDB_keep, SrcDir, PROXY, LOG)
+
+                for SearchString in SearchString_list:
+                    # Search into file
+                    LOG.info("Searching for \'" + SearchString + "\'...")
+                    PhishingDBExtractor(phishingdb_file, SearchString, LOG, SQL, TABLEname, PROXY, UAFILE)
+
+                # Proceed to file delete if don't want to keep it
+                if ConfPHISHINGDB_keep is not True:
+                    DeletePhishingDBFile(phishingdb_file, LOG)
+                else:
+                    pass
+
+            except:
+                err = sys.exc_info()
+                LOG.error("Openphish module error: " + str(err))
+        else:
+            pass
 
 # Try to download Phshing kit sources
 def TryDLPK(TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE):

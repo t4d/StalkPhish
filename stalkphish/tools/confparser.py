@@ -66,6 +66,10 @@ class ConfParser:
                 self.PHISHSTATS_url = self.config['PHISHSTATS']['OSINT_url']
                 self.PHISHSTATS_keep = self.config['PHISHSTATS'].getboolean('keep_files')
 
+                self.PHISHINGDB_active = self.config['Phishing.Database'].getboolean('activate')
+                self.PHISHINGDB_url = self.config['Phishing.Database']['OSINT_url']
+                self.PHISHINGDB_keep = self.config['Phishing.Database'].getboolean('keep_files')
+
         except IOError:
             print("[!!!] Configuration file Error: " + Confile)
         except:
