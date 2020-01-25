@@ -296,48 +296,48 @@ def LaunchModules(SearchString):
     else:
         pass
 
-        ############################
-        # Phishing.Database module #
-        ############################
-        ModulePhishingDB = CONF.PHISHINGDB_active
-        if ModulePhishingDB is True:
-            from modules.phishingdb import PhishingDBOSINT, PhishingDBExtractor, DeletePhishingDBFile
-            ConfPHISHINGDB_url = CONF.PHISHINGDB_url
-            ConfPHISHINGDB_keep = CONF.PHISHINGDB_keep
+    ############################
+    # Phishing.Database module #
+    ############################
+    ModulePhishingDB = CONF.PHISHINGDB_active
+    if ModulePhishingDB is True:
+        from modules.phishingdb import PhishingDBOSINT, PhishingDBExtractor, DeletePhishingDBFile
+        ConfPHISHINGDB_url = CONF.PHISHINGDB_url
+        ConfPHISHINGDB_keep = CONF.PHISHINGDB_keep
 
-            try:
-                # Get Phishing.Database free feed (if older than 1 hour)
-                phishingdb_file = ""
-                filelist = glob.glob(SrcDir + "phishingdb-feed-*.txt")
-                if filelist:
-                    last_phishingdb_file = max(filelist, key=os.path.getctime)
-                    if os.stat(last_phishingdb_file).st_mtime < time.time() - 7200:
-                        # file older than 2 hours, download a new one
-                        phishingdb_file = SrcDir + "phishingdb-feed-" + time.strftime("%Y%m%d-%H%M") + ".txt"
-                        PhishingDBOSINT(phishingdb_file, ConfPHISHINGDB_url, ConfPHISHINGDB_keep, SrcDir, PROXY, LOG)
-                    else:
-                        LOG.info("Phishing.Database\'s file still exist (<2h). Proceeding to extraction...")
-                        phishingdb_file = last_phishingdb_file
-                else:
+        try:
+            # Get Phishing.Database free feed (if older than 1 hour)
+            phishingdb_file = ""
+            filelist = glob.glob(SrcDir + "phishingdb-feed-*.txt")
+            if filelist:
+                last_phishingdb_file = max(filelist, key=os.path.getctime)
+                if os.stat(last_phishingdb_file).st_mtime < time.time() - 7200:
+                    # file older than 2 hours, download a new one
                     phishingdb_file = SrcDir + "phishingdb-feed-" + time.strftime("%Y%m%d-%H%M") + ".txt"
                     PhishingDBOSINT(phishingdb_file, ConfPHISHINGDB_url, ConfPHISHINGDB_keep, SrcDir, PROXY, LOG)
-
-                for SearchString in SearchString_list:
-                    # Search into file
-                    LOG.info("Searching for \'" + SearchString + "\'...")
-                    PhishingDBExtractor(phishingdb_file, SearchString, LOG, SQL, TABLEname, PROXY, UAFILE)
-
-                # Proceed to file delete if don't want to keep it
-                if ConfPHISHINGDB_keep is not True:
-                    DeletePhishingDBFile(phishingdb_file, LOG)
                 else:
-                    pass
+                    LOG.info("Phishing.Database\'s file still exist (<2h). Proceeding to extraction...")
+                    phishingdb_file = last_phishingdb_file
+            else:
+                phishingdb_file = SrcDir + "phishingdb-feed-" + time.strftime("%Y%m%d-%H%M") + ".txt"
+                PhishingDBOSINT(phishingdb_file, ConfPHISHINGDB_url, ConfPHISHINGDB_keep, SrcDir, PROXY, LOG)
 
-            except:
-                err = sys.exc_info()
-                LOG.error("Openphish module error: " + str(err))
-        else:
-            pass
+            for SearchString in SearchString_list:
+                # Search into file
+                LOG.info("Searching for \'" + SearchString + "\'...")
+                PhishingDBExtractor(phishingdb_file, SearchString, LOG, SQL, TABLEname, PROXY, UAFILE)
+
+            # Proceed to file delete if don't want to keep it
+            if ConfPHISHINGDB_keep is not True:
+                DeletePhishingDBFile(phishingdb_file, LOG)
+            else:
+                pass
+
+        except:
+            err = sys.exc_info()
+            LOG.error("Openphish module error: " + str(err))
+    else:
+        pass
 
 # Try to download Phshing kit sources
 def TryDLPK(TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE):
