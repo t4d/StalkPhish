@@ -187,7 +187,7 @@ def TryPKDownload(siteURL, siteDomain, IPaddress, TABLEname, InvTABLEname, DLDir
                             if int(len(zip.split("/")[3:][0])) > 0:
                                 LOG.info("trying " + zip + ".zip")
                                 # Try to use cfscraper if Cloudflare's check
-                                if "Cloudflare" in PageTitle:
+                                if PageTitle != None and "Cloudflare" in PageTitle:
                                     scraper = cfscrape.create_scraper()
                                     rz = scraper.get(zip + ".zip", headers=user_agent, proxies=proxies, allow_redirects=True, timeout=(5, 12), verify=False)
                                 else:
