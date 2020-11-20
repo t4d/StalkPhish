@@ -89,10 +89,10 @@ def PhishtankOSINT(phishtank_file, ConfPHISHTANK_url, ConfPHISHTANK_keep, SrcDir
     # Get phishtank OSINT JSON file
     proxies = {'http': PROXY, 'https': PROXY}
     LOG.info("Retrieving Phishtank's JSON file... Could take several minutes...")
-    # resp = requests.get(url=ConfPHISHTANK_url, proxies=proxies, allow_redirects=True)
     # Using CloudFlare Scraper
     scraper = cfscrape.create_scraper()
-    resp = scraper.get(ConfPHISHTANK_url, proxies=proxies, allow_redirects=True, timeout=(10, 20))
+    # resp = scraper.get(ConfPHISHTANK_url, proxies=proxies, allow_redirects=True, timeout=(10, 20))
+    resp = scraper.get(ConfPHISHTANK_url, allow_redirects=True, timeout=(10, 20))
 
     # download PhishTank JSON file
     if str(resp.status_code) == "403":
