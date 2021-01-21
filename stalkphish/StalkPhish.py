@@ -94,7 +94,7 @@ def args_parse():
             else:
                 print("  ERROR - Can't find configuration file.")
                 usage()
-        elif confound is "NO":
+        elif confound == "NO":
             print("  Error - Configuration file is mandatory.")
             usage()
 
@@ -462,7 +462,7 @@ def main():
             pass
 
         # Only add URL into Database
-        if UniqueURL is "YES":
+        if UniqueURL == "YES":
             LOG.info("Add URL into database: {}".format(URLadd))
             AddUniqueURL(URLadd, LOG, SQL, TABLEname, PROXY, UAFILE)
             sys.stdout.flush()
@@ -471,13 +471,13 @@ def main():
             pass
 
         # Modules launch
-        if OSINTsources is "YES":
+        if OSINTsources == "YES":
             LaunchModules(SearchString)
         else:
             pass
 
         # Phishing Kit download launch if activated
-        if DLPhishingKit is "YES":
+        if DLPhishingKit == "YES":
             LOG.info("Starting trying to download phishing kits sources...")
             TryDLPK(TABLEname, InvTABLEname, DLDir, SQL, PROXY, LOG, UAFILE)
         else:
