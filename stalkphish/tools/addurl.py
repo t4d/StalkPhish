@@ -25,7 +25,7 @@ def AddUniqueURL(URLadd, LOG, SQL, TABLEname, PROXY, UAFILE):
     # remove URL containing UID-style strings
     siteURL = re.split("(?:[0-9a-fA-F]:?){32}", URLadd.rstrip())[0]
     # Test if entry still exist in DB
-    if SQL.SQLiteVerifyEntry(TABLEname, siteURL) is 0:
+    if SQL.SQLiteVerifyEntry(TABLEname, siteURL) == 0:
         now = str(TimestampNow().Timestamp())
         siteDomain = urlparse(URLadd).netloc
         source_url = "Manual"

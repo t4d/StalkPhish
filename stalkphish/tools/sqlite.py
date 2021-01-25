@@ -56,7 +56,7 @@ class SqliteCmd(object):
         res = self.cur.execute('SELECT EXISTS (SELECT 1 FROM ' + TABLEname + ' WHERE siteURL LIKE ' + "\"" + siteURL + "%\"" + ' LIMIT 1);')
         fres = res.fetchone()[0]
         # 0ô
-        if fres is not 0:
+        if fres != 0:
             return 1
         else:
             return 0
@@ -113,7 +113,7 @@ class SqliteCmd(object):
         res = self.cur.execute('SELECT EXISTS (SELECT 1 FROM ' + InvTABLEname + ' WHERE (siteDomain=? AND IPaddress=?)) LIMIT 1;', (siteDomain, IPaddress))
         fres = res.fetchone()[0]
         # 0ô
-        if fres is not 0:
+        if fres != 0:
             return 1
         else:
             return 0
