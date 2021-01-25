@@ -20,7 +20,7 @@ def SiteURLSQL(item, LOG, SQL, TABLEname, PROXY, UAFILE, UAG):
     dn = dirname(siteURL)
 
     # Test if entry still exist in DB
-    if SQL.SQLiteVerifyEntry(TABLEname, dn) is 0:
+    if SQL.SQLiteVerifyEntry(TABLEname, dn) == 0:
         now = str(TimestampNow().Timestamp())
         siteDomain = urlparse(item['page']['url']).netloc
         source_url = item['result'].replace("/api/v1", "")
@@ -69,12 +69,16 @@ def SiteURLSQL(item, LOG, SQL, TABLEname, PROXY, UAFILE, UAG):
 
 
 # Urlscan Web Search
-def UrlscanOSINT(ConfURLSCAN_url, PROXY, SearchString, LOG):
+def UrlscanOSINT(ConfURLSCAN_apikey, ConfURLSCAN_url, PROXY, SearchString, LOG):
     global HTMLText
     try:
         proxies = {'http': PROXY, 'https': PROXY}
         payload = {'q': SearchString}
-        r = requests.get(url=ConfURLSCAN_url + "?q=" + SearchString, proxies=proxies, allow_redirects=True, timeout=(10, 20))
+        headers = {}
+        if ConfURLSCAN_apikey:
+            headers = {'API-Key': '{}'.format(ConfURLSCAN_apikey)}
+
+        r = requests.get(url=ConfURLSCAN_url + "?q=page.url:" + SearchString + " OR page.domain:" + SearchString, headers=headers, proxies=proxies, allow_redirects=True, timeout=(10, 20))
         HTMLText = r.json()
         LOG.info("Searching for \'" + SearchString + "\'...")
 

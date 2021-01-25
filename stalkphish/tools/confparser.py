@@ -46,6 +46,10 @@ class ConfParser:
                 # Modules
                 self.URLSCAN_active = self.config['URLSCAN'].getboolean('activate')
                 self.URLSCAN_url = self.config['URLSCAN']['API_url']
+                try:
+                    self.URLSCAN_apikey = self.config['URLSCAN']['API_key']
+                except:
+                    self.URLSCAN_apikey = None
 
                 self.URLQUERY_active = self.config['URLQUERY'].getboolean('activate')
                 self.URLQUERY_url = self.config['URLQUERY']['OSINT_url']

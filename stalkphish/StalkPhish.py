@@ -29,7 +29,7 @@ from tools.sqlite import SqliteCmd
 from tools.addurl import AddUniqueURL
 from tools.logging import Logger
 from tools.confparser import ConfParser
-VERSION = "0.9.8-2"
+VERSION = "0.9.8-3"
 
 
 # Graceful banner  :)
@@ -132,9 +132,10 @@ def LaunchModules(SearchString):
     if ModuleUrlscan is True:
         from modules.urlscan import UrlscanOSINT, UrlscanExtractor
         ConfURLSCAN_url = CONF.URLSCAN_url
+        ConfURLSCAN_apikey = CONF.URLSCAN_apikey
 
         for SearchString in SearchString_list:
-            UrlscanOSINT(ConfURLSCAN_url, PROXY, SearchString, LOG)
+            UrlscanOSINT(ConfURLSCAN_apikey, ConfURLSCAN_url, PROXY, SearchString, LOG)
             UrlscanExtractor(LOG, SQL, TABLEname, PROXY, UAFILE)
     else:
         pass
