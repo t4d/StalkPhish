@@ -33,6 +33,9 @@
 * PySocks
 * lxml
 
+## Join us
+You can join us on Keybase: [https://keybase.io/team/stalkphish](https://keybase.io/team/stalkphish) channel 'stalkphish'!
+
 ## Upgrade StalkPhish from <0.9.6
 Database schema changed (one more time :) for adding the ASnumber, a page hash, and a new column which contains e-mails extracted from Phishing kit's zip, you can modify your existing database like this:
 ~~~
