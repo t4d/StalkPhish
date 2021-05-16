@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.13
 
 LABEL maintainer "o0tad0o@gmail.com"
 
@@ -6,7 +6,8 @@ ENV INITSYSTEM=on
 
 # install packages
 RUN apk --no-cache add --update \
-py-lxml \
+py3-lxml \
+py3-pip \
 git \
 python3 \
 openrc \
