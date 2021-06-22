@@ -17,6 +17,9 @@
 - add just one url at a time into database
 - store AS number in database
 
+## Blog Posts
+You can find some blog posts relatives to phishing and phishing kits on [https://stalkphish.com](https://stalkphish.com/)
+
 ## OSINT modules
 * [urlscan.io](https://urlscan.io/about-api/) search API
 * [urlquery.net](https://urlquery.net/search) search web crawler
