@@ -90,7 +90,7 @@ class ZipSearch:
                 file = zipfile.ZipFile(savefile, "r")
                 extracted_emails = []
                 for name in file.namelist():
-                    if re.findall("php$", name):
+                    if re.findall("php|ini$", name):
                         scam_email2 = re.findall(r'[\w\.-]+@[\w\.-]+\.\w+', str(file.read(name)))
                         for mailadd in scam_email2:
                             if mailadd not in extracted_emails:
@@ -99,7 +99,7 @@ class ZipSearch:
                 if any(map(len, extracted_emails)):
                     return [extracted_emails]
                 else:
-                    LOG.info("No emails in this kit? Uglyyyyy ô0")
+                    LOG.info("No emails in this kit")
                     pass
             else:
                 LOG.info("{} is not a zip file...".format(savefile))
