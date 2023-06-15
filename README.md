@@ -3,7 +3,7 @@
 # StalkPhish
 *StalkPhish - The Phishing kits stalker*
 
-**StalkPhish** is a tool created for searching into free OSINT databases for specific phishing kits URL. More, **StalkPhish** is designed to try finding phishing kits sources. Some scammers can't or don't remove their phishing kit sources when they deploy it. You can try to find these sources to extract some useful information as: e-mail addresses where is send stolen data, some more information about scammer or phishing kit developer. From there you can extend your knowledge about the threat and organizations, and get much useful information for your investigations.
+**StalkPhish** is a tool created for searching into free OSINT databases for specific phishing kits URL. More, **StalkPhish** is designed to try finding phishing kits sources. Some scammers can't or don't remove their phishing kit sources when they deploy it. You can try to find these sources to extract some useful information as: e-mail addresses/Telegram channel where is send stolen data, some more information about scammer or phishing kit developer. From there you can extend your knowledge about the threat and organizations, and get much useful information for your investigations.
 
 ## Features
 - find URL where a phishing kit is deployed (from OSINT databases)
@@ -18,7 +18,7 @@
 - store AS number in database
 
 ## Stalkphish.io
-[Stalkphish.io](https://stalkphish.io/) is our online Stalkphish infrastructure, making available our data through a REST API.
+[Stalkphish.io](https://stalkphish.io/) is our online Stalkphish infrastructure, making our data available, along with a lot of other information, via a REST API. 
 
 ## Blog Posts
 You can find some blog posts relatives to phishing and phishing kits on [https://stalkphish.com](https://stalkphish.com/)
