@@ -1,6 +1,6 @@
-FROM alpine:3.13
+FROM alpine:3.18
 
-LABEL maintainer "o0tad0o@gmail.com"
+LABEL maintainer "contact@stalkphish.com"
 
 ENV INITSYSTEM=on
 
