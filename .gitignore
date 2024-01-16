@@ -5,4 +5,11 @@ __pycache__/
 # StalkPhish specific
 dl/
 log/
+db/# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# StalkPhish specific
+dl/
+log/
 db/
